@@ -1,2 +1,3 @@
-.backend*/guide.md
-.frontend*/guide.md
+node_modules
+
+/backend
