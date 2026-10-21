@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.get("/api/v1/health", (_req, res) => {
   res.status(200).json({
     success: true,
-    message: "Backend API is running",
+    message: "Backend API is running...",
     data: {
       status: "OK",
       environment: process.env.NODE_ENV,

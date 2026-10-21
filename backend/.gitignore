@@ -1,4 +1,7 @@
 node_modules/
 dist/
+.agents
+.claude
+.cursor
+.devin
 .env
-.env.*
