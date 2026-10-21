@@ -1,0 +1,15 @@
+enum UserRole {
+    ADMIN
+    STUDENT
+}
+
+enum UserStatus {
+    ACTIVE
+    BLOCKED
+}
+
+enum AssignmentStatus {
+    PENDING
+    ACCEPTED
+    REJECTED
+}
