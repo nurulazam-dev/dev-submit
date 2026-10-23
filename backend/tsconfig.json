@@ -1,14 +1,36 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "preserve",
+    // "target": "ES2022",
+    // "module": "preserve",
+    "module": "ESNext",
     "moduleResolution": "bundler",
+    "target": "ES2023",
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "types": ["node"],
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "outDir": "dist"
+    "rootDir": "./",
+    "outDir": "./dist",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmitOnError": true,
+    "allowJs": true,
+    "checkJs": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["**/*.ts"]
+  // "include": ["**/*.ts"]
+  "include": ["src/**/*", "prisma"],
+  "exclude": ["node_modules", "dist", "generated/prisma"]
 }

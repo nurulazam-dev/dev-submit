@@ -1,32 +1,43 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
+import express, { Application, Request, Response } from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import { envVars } from "./app/config/env";
+import qs from "qs";
+import { IndexRoutes } from "./app/routes";
+import { notFound } from "./app/middleware/notFound";
+import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
+import helmet from "helmet";
 
-const app = express();
+const app: Application = express();
+
+app.set("query parser", (str: string) => qs.parse(str));
 
 app.use(helmet());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: [
+      envVars.FRONTEND_URL,
+      "http://localhost:3000",
+      "http://localhost:5000",
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "stripe-signature"],
   }),
 );
 
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "1mb" }));
 
-app.get("/api/v1/health", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Backend API is running...",
-    data: {
-      status: "OK",
-      environment: process.env.NODE_ENV,
-    },
-  });
+app.use("/api/v1", IndexRoutes);
+
+app.get("/", (_req: Request, res: Response) => {
+  res.send("Dev Submit API is running...");
 });
+
+app.use(globalErrorHandler);
+app.use(notFound);
 
 export default app;

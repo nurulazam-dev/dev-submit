@@ -1,0 +1,89 @@
+// use prisma-8
+model User {
+  id                String       @id @default(uuid())
+  name              String
+  email             String
+  password          String
+  role              UserRole     @default(STUDENT)
+  status            UserStatus   @default(ACTIVE)
+  passwordChangedAt DateTime?
+  resetOtpHash      String?
+  resetOtpExpiresAt DateTime?
+  profile           Profile?
+  submissions       Submission[]
+  reviews           Review[]
+  createdAt         DateTime     @default(now())
+
+  @@unique([email])
+  @@index([role])
+  @@index([status])
+  @@map("user")
+}
+
+model Profile {
+  id      String  @id @default(uuid())
+  phone   String?
+  address String?
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("profile")
+}
+
+model Submission {
+  id          String           @id @default(uuid())
+  title       String
+  description String
+  githubUrl   String
+  liveUrl     String
+  status      SubmissionStatus @default(PENDING)
+  submittedAt DateTime         @default(now())
+  studentId   String
+  student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  review      Review[]
+
+  createdAt   DateTime         @default(now())
+
+  @@index([studentId])
+  @@index([status])
+
+  @@map("submissions")
+}
+
+model Review {
+  id           String           @id @default(uuid())
+
+  status       SubmissionStatus @default(PENDING)
+  feedback     String?
+
+  submittedAt  DateTime         @default(now())
+  submissionId String
+  submission   Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewerId   String
+  reviewer     User             @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime         @default(now())
+
+  @@index([reviewerId])
+  @@index([submissionId])
+  @@index([status])
+
+  @@map("reviews")
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

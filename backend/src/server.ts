@@ -1,8 +1,84 @@
-import "dotenv/config";
+import { Server } from "http";
+import app from "./app";
+import { envVars } from "./app/config/env";
+// import { seedAdmin } from "./app/utils/seedAdmin";
+
+let server: Server;
+
+const main = async () => {
+  try {
+    // 1st admin seed
+    // await seedAdmin();
+
+    server = app.listen(envVars.PORT, () => {
+      console.log(`Server is running on PORT: ${envVars.PORT}`);
+    });
+  } catch (error) {
+    console.error("Fail to start server", error);
+  }
+};
+
+// SIGTERM signal handler
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received. Shutting down server...");
+
+  if (server) {
+    server.close(() => {
+      console.log("Server closed gracefully.");
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+// SIGINT signal handler
+process.on("SIGINT", () => {
+  console.log("SIGINT signal received. Shutting down server...");
+
+  if (server) {
+    server.close(() => {
+      console.log("Server closed gracefully.");
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+// uncaught exception handler
+process.on("uncaughtException", (error) => {
+  console.log("Uncaught Exception Detected... Shutting down server", error);
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+// unhandled rejection handler
+process.on("unhandledRejection", (error) => {
+  console.log("Unhandled Rejection Detected... Shutting down server", error);
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+main();
+
+/* import "dotenv/config";
 import app from "./app";
 
 const PORT = Number(process.env.PORT) || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-});
+}); */
