@@ -6,6 +6,6 @@ dist/
 .devin
 .env
 
-/src/app/module/user
+
 /src/app/module/stats
 

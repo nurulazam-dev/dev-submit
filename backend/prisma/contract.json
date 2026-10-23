@@ -4,10 +4,6 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "profile": {
-      "model": "Profile",
-      "namespace": "public"
-    },
     "reviews": {
       "model": "Review",
       "namespace": "public"
@@ -70,74 +66,6 @@
           }
         },
         "models": {
-          "Profile": {
-            "fields": {
-              "address": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "id": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "phone": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "userId": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              }
-            },
-            "relations": {
-              "user": {
-                "cardinality": "N:1",
-                "nullable": false,
-                "on": {
-                  "localFields": [
-                    "userId"
-                  ],
-                  "targetFields": [
-                    "id"
-                  ]
-                },
-                "to": {
-                  "model": "User",
-                  "namespace": "public"
-                }
-              }
-            },
-            "storage": {
-              "fields": {
-                "address": {
-                  "column": "address"
-                },
-                "id": {
-                  "column": "id"
-                },
-                "phone": {
-                  "column": "phone"
-                },
-                "userId": {
-                  "column": "userId"
-                }
-              },
-              "namespaceId": "public",
-              "table": "profile"
-            }
-          },
           "Review": {
             "fields": {
               "createdAt": {
@@ -399,6 +327,13 @@
           },
           "User": {
             "fields": {
+              "address": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -438,6 +373,13 @@
                 "nullable": true,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "phone": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -483,22 +425,6 @@
               }
             },
             "relations": {
-              "profile": {
-                "cardinality": "1:1",
-                "nullable": true,
-                "on": {
-                  "localFields": [
-                    "id"
-                  ],
-                  "targetFields": [
-                    "userId"
-                  ]
-                },
-                "to": {
-                  "model": "Profile",
-                  "namespace": "public"
-                }
-              },
               "reviews": {
                 "cardinality": "1:N",
                 "on": {
@@ -532,6 +458,9 @@
             },
             "storage": {
               "fields": {
+                "address": {
+                  "column": "address"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -549,6 +478,9 @@
                 },
                 "passwordChangedAt": {
                   "column": "passwordChangedAt"
+                },
+                "phone": {
+                  "column": "phone"
                 },
                 "resetOtpExpiresAt": {
                   "column": "resetOtpExpiresAt"
@@ -576,67 +508,6 @@
       "public": {
         "entries": {
           "table": {
-            "profile": {
-              "columns": {
-                "address": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": true
-                },
-                "id": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                },
-                "phone": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": true
-                },
-                "userId": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                }
-              },
-              "foreignKeys": [
-                {
-                  "index": {
-                    "unique": [
-                      "userId"
-                    ]
-                  },
-                  "onDelete": "cascade",
-                  "source": {
-                    "columns": [
-                      "userId"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "profile"
-                  },
-                  "target": {
-                    "columns": [
-                      "id"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "user"
-                  }
-                }
-              ],
-              "indexes": [],
-              "primaryKey": {
-                "columns": [
-                  "id"
-                ]
-              },
-              "uniques": [
-                {
-                  "columns": [
-                    "userId"
-                  ]
-                }
-              ]
-            },
             "reviews": {
               "checks": [
                 {
@@ -909,6 +780,11 @@
                 }
               ],
               "columns": {
+                "address": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "dataType": "pg/timestamptz",
@@ -942,6 +818,11 @@
                   "codecId": "pg/timestamptz-temporal@1",
                   "dataType": "pg/timestamptz",
                   "nullable": true
+                },
+                "phone": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
                 },
                 "resetOtpExpiresAt": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -1011,7 +892,8 @@
               "uniques": [
                 {
                   "columns": [
-                    "email"
+                    "email",
+                    "phone"
                   ]
                 }
               ]
@@ -1046,23 +928,12 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "7885c7ffb3dd5c40fa515169d3f6e15e9a88a47b5794f7d6f304b47eb926989e"
+    "storageHash": "092faf76f71307271947ac7026a16e463c2233c7c327cdf7df5148c8ad395237"
   },
   "execution": {
-    "executionHash": "cd5ca227924a4e2244144ecb64f12c7676e5fe318c9053f649d5e2455e9e9d91",
+    "executionHash": "75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25",
     "mutations": {
       "defaults": [
-        {
-          "onCreate": {
-            "id": "uuidv4",
-            "kind": "generator"
-          },
-          "ref": {
-            "entry": "profile",
-            "field": "id",
-            "namespace": "public"
-          }
-        },
         {
           "onCreate": {
             "id": "uuidv4",

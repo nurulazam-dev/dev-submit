@@ -33,5 +33,6 @@ npm run dev
 ```bash
 npx prisma contract emit       # Update contract.json and contract.d.ts
 npx prisma db init             # Create tables in the database
+npx prisma db update             # update the database
 npx prisma migration status    # Show migration status
 ```

@@ -2,6 +2,7 @@ export interface IRegisterPayload {
   name: string;
   email: string;
   password: string;
+  phone: string;
 }
 
 export interface ILoginUserPayload {
@@ -25,5 +26,6 @@ export type TTokenUser = {
   role: "ADMIN" | "STUDENT";
   name: string;
   email: string;
+  phone: string;
   status: "ACTIVE" | "BLOCKED";
 };

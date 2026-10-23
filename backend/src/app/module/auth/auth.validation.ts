@@ -14,14 +14,15 @@ const passwordSchema = z
   .min(8, "Password must be at least 8 characters")
   .max(64, "Password must not exceed 64 characters");
 
-// const phoneSchema = z
-//   .string("Phone number is required!")
-//   .regex(/^\d{11,13}$/, "Phone must be 11-13 digits");
+const phoneSchema = z
+  .string("Phone number is required!")
+  .regex(/^\d{11,13}$/, "Phone must be 11-13 digits");
 
 const registerStudentZodSchema = z.object({
   name: nameSchema,
   email: emailSchema,
   password: passwordSchema,
+  phone: phoneSchema,
 });
 
 const loginZodSchema = z.object({

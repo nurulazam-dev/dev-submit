@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'7885c7ffb3dd5c40fa515169d3f6e15e9a88a47b5794f7d6f304b47eb926989e'>;
+  StorageHashBase<'092faf76f71307271947ac7026a16e463c2233c7c327cdf7df5148c8ad395237'>;
 export type ExecutionHash =
-  ExecutionHashBase<'cd5ca227924a4e2244144ecb64f12c7676e5fe318c9053f649d5e2455e9e9d91'>;
+  ExecutionHashBase<'75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -234,12 +234,6 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
-    readonly Profile: {
-      readonly address: CodecTypes['pg/text@1']['output'] | null;
-      readonly id: CodecTypes['pg/text@1']['output'];
-      readonly phone: CodecTypes['pg/text@1']['output'] | null;
-      readonly userId: CodecTypes['pg/text@1']['output'];
-    };
     readonly Review: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly feedback: CodecTypes['pg/text@1']['output'] | null;
@@ -261,12 +255,14 @@ export type FieldOutputTypes = {
       readonly title: CodecTypes['pg/text@1']['output'];
     };
     readonly User: {
+      readonly address: CodecTypes['pg/text@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
       readonly passwordChangedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly phone: CodecTypes['pg/text@1']['output'];
       readonly resetOtpExpiresAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly resetOtpHash: CodecTypes['pg/text@1']['output'] | null;
       readonly role: 'ADMIN' | 'STUDENT';
@@ -276,12 +272,6 @@ export type FieldOutputTypes = {
 };
 export type FieldInputTypes = {
   readonly public: {
-    readonly Profile: {
-      readonly address: CodecTypes['pg/text@1']['input'] | null;
-      readonly id: CodecTypes['pg/text@1']['input'];
-      readonly phone: CodecTypes['pg/text@1']['input'] | null;
-      readonly userId: CodecTypes['pg/text@1']['input'];
-    };
     readonly Review: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly feedback: CodecTypes['pg/text@1']['input'] | null;
@@ -303,12 +293,14 @@ export type FieldInputTypes = {
       readonly title: CodecTypes['pg/text@1']['input'];
     };
     readonly User: {
+      readonly address: CodecTypes['pg/text@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
       readonly passwordChangedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly phone: CodecTypes['pg/text@1']['input'];
       readonly resetOtpExpiresAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly resetOtpHash: CodecTypes['pg/text@1']['input'] | null;
       readonly role: 'ADMIN' | 'STUDENT';
@@ -318,12 +310,6 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
-    readonly profile: {
-      readonly address: CodecTypes['pg/text@1']['output'] | null;
-      readonly id: CodecTypes['pg/text@1']['output'];
-      readonly phone: CodecTypes['pg/text@1']['output'] | null;
-      readonly userId: CodecTypes['pg/text@1']['output'];
-    };
     readonly reviews: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly feedback: CodecTypes['pg/text@1']['output'] | null;
@@ -345,12 +331,14 @@ export type StorageColumnTypes = {
       readonly title: CodecTypes['pg/text@1']['output'];
     };
     readonly user: {
+      readonly address: CodecTypes['pg/text@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
       readonly passwordChangedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly phone: CodecTypes['pg/text@1']['output'];
       readonly resetOtpExpiresAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly resetOtpHash: CodecTypes['pg/text@1']['output'] | null;
       readonly role: 'ADMIN' | 'STUDENT';
@@ -360,12 +348,6 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
-    readonly profile: {
-      readonly address: CodecTypes['pg/text@1']['input'] | null;
-      readonly id: CodecTypes['pg/text@1']['input'];
-      readonly phone: CodecTypes['pg/text@1']['input'] | null;
-      readonly userId: CodecTypes['pg/text@1']['input'];
-    };
     readonly reviews: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly feedback: CodecTypes['pg/text@1']['input'] | null;
@@ -387,12 +369,14 @@ export type StorageColumnInputTypes = {
       readonly title: CodecTypes['pg/text@1']['input'];
     };
     readonly user: {
+      readonly address: CodecTypes['pg/text@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
       readonly passwordChangedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly phone: CodecTypes['pg/text@1']['input'];
       readonly resetOtpExpiresAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly resetOtpHash: CodecTypes['pg/text@1']['input'] | null;
       readonly role: 'ADMIN' | 'STUDENT';
@@ -402,14 +386,6 @@ export type StorageColumnInputTypes = {
 };
 
 export namespace Models {
-  export type public_Profile = {
-    address: CodecTypes['pg/text@1']['output'] | null;
-    id: CodecTypes['pg/text@1']['output'];
-    phone: CodecTypes['pg/text@1']['output'] | null;
-    userId: CodecTypes['pg/text@1']['output'];
-    user: public_User;
-    readonly [RelationKeys]?: 'user';
-  };
   export type public_Review = {
     createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     feedback: CodecTypes['pg/text@1']['output'] | null;
@@ -437,26 +413,26 @@ export namespace Models {
     readonly [RelationKeys]?: 'review' | 'student';
   };
   export type public_User = {
+    address: CodecTypes['pg/text@1']['output'] | null;
     createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     email: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/text@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
     password: CodecTypes['pg/text@1']['output'];
     passwordChangedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+    phone: CodecTypes['pg/text@1']['output'];
     resetOtpExpiresAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     resetOtpHash: CodecTypes['pg/text@1']['output'] | null;
     role: 'ADMIN' | 'STUDENT';
     status: 'ACTIVE' | 'BLOCKED';
-    profile: public_Profile | null;
     reviews: public_Review[];
     submissions: public_Submission[];
-    readonly [RelationKeys]?: 'profile' | 'reviews' | 'submissions';
+    readonly [RelationKeys]?: 'reviews' | 'submissions';
   };
 }
 
 export declare const models: {
   public: {
-    Profile: Models.public_Profile;
     Review: Models.public_Review;
     Submission: Models.public_Submission;
     User: Models.public_User;
@@ -481,51 +457,6 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly profile: {
-              columns: {
-                readonly address: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                  readonly many: false;
-                };
-                readonly id: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly phone: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                  readonly many: false;
-                };
-                readonly userId: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-              };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['userId'] }];
-              indexes: readonly [];
-              foreignKeys: readonly [
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'profile';
-                    readonly columns: readonly ['userId'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'user';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-              ];
-            };
             readonly reviews: {
               columns: {
                 readonly createdAt: {
@@ -722,6 +653,12 @@ type ContractBase = Omit<
             };
             readonly user: {
               columns: {
+                readonly address: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly createdAt: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-temporal@1';
@@ -759,6 +696,12 @@ type ContractBase = Omit<
                   readonly nullable: true;
                   readonly many: false;
                 };
+                readonly phone: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
                 readonly resetOtpExpiresAt: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-temporal@1';
@@ -793,7 +736,7 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['email'] }];
+              uniques: readonly [{ readonly columns: readonly ['email', 'phone'] }];
               indexes: readonly [
                 {
                   readonly name: 'user_role_idx_2c1ddf83';
@@ -835,7 +778,6 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly profile: { readonly namespace: 'public' & NamespaceId; readonly model: 'Profile' };
     readonly reviews: { readonly namespace: 'public' & NamespaceId; readonly model: 'Review' };
     readonly submissions: {
       readonly namespace: 'public' & NamespaceId;
@@ -847,47 +789,6 @@ type ContractBase = Omit<
     readonly namespaces: {
       readonly public: {
         readonly models: {
-          readonly Profile: {
-            readonly fields: {
-              readonly address: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly id: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly phone: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly userId: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-            };
-            readonly relations: {
-              readonly user: {
-                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
-                readonly cardinality: 'N:1';
-                readonly nullable: false;
-                readonly on: {
-                  readonly localFields: readonly ['userId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
-            };
-            readonly storage: {
-              readonly table: 'profile';
-              readonly namespaceId: 'public';
-              readonly fields: {
-                readonly address: { readonly column: 'address' };
-                readonly id: { readonly column: 'id' };
-                readonly phone: { readonly column: 'phone' };
-                readonly userId: { readonly column: 'userId' };
-              };
-            };
-          };
           readonly Review: {
             readonly fields: {
               readonly createdAt: {
@@ -1047,6 +948,10 @@ type ContractBase = Omit<
           };
           readonly User: {
             readonly fields: {
+              readonly address: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1077,6 +982,10 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
+              readonly phone: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly resetOtpExpiresAt: {
                 readonly nullable: true;
                 readonly type: {
@@ -1098,18 +1007,6 @@ type ContractBase = Omit<
               };
             };
             readonly relations: {
-              readonly profile: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Profile';
-                };
-                readonly cardinality: '1:1';
-                readonly nullable: true;
-                readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['userId'];
-                };
-              };
               readonly reviews: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1137,12 +1034,14 @@ type ContractBase = Omit<
               readonly table: 'user';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly address: { readonly column: 'address' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly email: { readonly column: 'email' };
                 readonly id: { readonly column: 'id' };
                 readonly name: { readonly column: 'name' };
                 readonly password: { readonly column: 'password' };
                 readonly passwordChangedAt: { readonly column: 'passwordChangedAt' };
+                readonly phone: { readonly column: 'phone' };
                 readonly resetOtpExpiresAt: { readonly column: 'resetOtpExpiresAt' };
                 readonly resetOtpHash: { readonly column: 'resetOtpHash' };
                 readonly role: { readonly column: 'role' };
@@ -1225,14 +1124,6 @@ type ContractBase = Omit<
     readonly executionHash: ExecutionHash;
     readonly mutations: {
       readonly defaults: readonly [
-        {
-          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
-          readonly ref: {
-            readonly entry: 'profile';
-            readonly field: 'id';
-            readonly namespace: 'public';
-          };
-        },
         {
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {

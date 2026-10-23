@@ -28,6 +28,7 @@ const issueTokens = (user: TTokenUser) => {
     role: user.role ?? "STUDENT",
     name: user.name,
     email: user.email,
+    phone: user.phone,
     status: user.status ?? "ACTIVE",
   };
 
@@ -58,6 +59,7 @@ const registerStudent = async (payload: IRegisterPayload) => {
     name: payload.name,
     email,
     password: await passwordUtils.hashPassword(payload.password),
+    phone: payload.phone,
     role: "STUDENT",
     status: "ACTIVE",
   });
