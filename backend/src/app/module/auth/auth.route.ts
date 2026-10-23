@@ -3,6 +3,7 @@ import { AuthController } from "./auth.controller";
 import { checkAuth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest.ts";
 import { AuthValidation } from "./auth.validation";
+import { RateLimiter } from "@/app/middleware/rateLimiter";
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.post(
 
 router.post(
   "/login",
+  RateLimiter.login,
   validateRequest(AuthValidation.loginZodSchema),
   AuthController.loginUser,
 );
@@ -24,12 +26,14 @@ router.get("/me", checkAuth("ADMIN", "STUDENT"), AuthController.getMe);
 
 router.post(
   "/forger-password",
+  RateLimiter.forgetPassword,
   validateRequest(AuthValidation.forgetPasswordZodSchema),
   AuthController.forgetPassword,
 );
 
 router.post(
   "/reset-password",
+  RateLimiter.resetPassword,
   validateRequest(AuthValidation.resetPasswordZodSchema),
   AuthController.resetPassword,
 );
