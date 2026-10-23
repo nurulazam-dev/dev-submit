@@ -16,10 +16,7 @@ export const checkAuth =
         req.headers.authorization?.replace("Bearer ", "");
 
       if (!accessToken) {
-        throw new AppError(
-          status.UNAUTHORIZED,
-          "Unauthorized access! No access token provided.",
-        );
+        throw new AppError(status.UNAUTHORIZED, "Unauthorized access!");
       }
 
       const verified = jwtUtils.verifyToken(

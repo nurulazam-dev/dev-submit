@@ -1,99 +1,102 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
-import { envVars } from "../config/env";
 import status from "http-status";
-import z from "zod";
-import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
-import { handleZodError } from "../errorHelpers/handleZodError";
+import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import { z } from "zod";
+import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
-import {
-  handlePrismaClientKnownRequestError,
-  handlePrismaClientUnknownError,
-  handlePrismaClientValidationError,
-  handlerPrismaClientInitializationError,
-  handlerPrismaClientRustPanicError,
-} from "../errorHelpers/handlePrismaErrors";
+import { handleDatabaseError } from "../errorHelpers/handleDatabaseError";
+import { handleZodError } from "../errorHelpers/handleZodError";
+import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
 
-export const globalErrorHandler = async (
+const isDev = envVars.NODE_ENV === "development";
+
+// Circular reference এ JSON crash এড়াতে শুধু দরকারি ফিল্ড পাঠানো হয় (শুধু development এ)
+const serializeError = (err: any) => {
+  if (!err || typeof err !== "object") return err;
+
+  return {
+    name: err.name,
+    message: err.message,
+    code: err.code,
+    sqlState: err.sqlState,
+    constraint: err.constraint,
+    table: err.table,
+    column: err.column,
+    meta: err.meta,
+    details: err.details,
+    cause: err.cause?.message,
+  };
+};
+
+export const globalErrorHandler = (
   err: any,
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  if (envVars.NODE_ENV === "development") {
+  // response আগেই শুরু হয়ে গেলে Express এর default handler এর হাতে ছেড়ে দিন
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  if (isDev) {
     console.log("Err from GlobalErrorHandler :", err);
   }
 
-  let errorSources: TErrorSources[] = [];
   let statusCode: number = status.INTERNAL_SERVER_ERROR;
-  let message: string = "Internal server error";
-  let stack: string | undefined = undefined;
+  let message = "Internal server error";
+  let errorSources: TErrorSources[] = [];
+  const stack: string | undefined = err?.stack;
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const simplifiedError = handlePrismaClientKnownRequestError(err);
-    statusCode = simplifiedError.statusCode as number;
-    message = simplifiedError.message;
-    errorSources = [...simplifiedError.errorSources];
-    stack = err.stack;
-  } else if (err instanceof Prisma.PrismaClientUnknownRequestError) {
-    const simplifiedError = handlePrismaClientUnknownError(err);
-    statusCode = simplifiedError.statusCode as number;
-    message = simplifiedError.message;
-    errorSources = [...simplifiedError.errorSources];
-    stack = err.stack;
-  } else if (err instanceof Prisma.PrismaClientValidationError) {
-    const simplifiedError = handlePrismaClientValidationError(err);
-    statusCode = simplifiedError.statusCode as number;
-    message = simplifiedError.message;
-    errorSources = [...simplifiedError.errorSources];
-    stack = err.stack;
-  } else if (err instanceof Prisma.PrismaClientRustPanicError) {
-    const simplifiedError = handlerPrismaClientRustPanicError();
-    statusCode = simplifiedError.statusCode as number;
-    message = simplifiedError.message;
-    errorSources = [...simplifiedError.errorSources];
-    stack = err.stack;
-  } else if (err instanceof Prisma.PrismaClientInitializationError) {
-    const simplifiedError = handlerPrismaClientInitializationError(err);
-    statusCode = simplifiedError.statusCode as number;
-    message = simplifiedError.message;
-    errorSources = [...simplifiedError.errorSources];
-    stack = err.stack;
+  if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err.message;
+    errorSources = [{ path: "", message: err.message }];
   } else if (err instanceof z.ZodError) {
     const simplifiedError = handleZodError(err);
     statusCode = simplifiedError.statusCode as number;
     message = simplifiedError.message;
     errorSources = [...simplifiedError.errorSources];
-    stack = err.stack;
-  } else if (err instanceof AppError) {
-    statusCode = err.statusCode;
-    message = err.message;
-    stack = err.stack;
-    errorSources = [
-      {
-        path: "",
-        message: err.message,
-      },
-    ];
-  } else if (err instanceof Error) {
-    statusCode = status.INTERNAL_SERVER_ERROR;
-    message = err.message;
-    stack = err.stack;
-    errorSources = [
-      {
-        path: "",
-        message: err.message,
-      },
-    ];
+  } else if (err instanceof TokenExpiredError) {
+    statusCode = status.UNAUTHORIZED;
+    message = "Token has expired";
+  } else if (err instanceof JsonWebTokenError) {
+    statusCode = status.UNAUTHORIZED;
+    message = "Invalid token";
+  } else if (err?.type === "entity.parse.failed") {
+    statusCode = status.BAD_REQUEST;
+    message = "Invalid JSON in request body";
+  } else if (err?.type === "entity.too.large") {
+    statusCode = status.REQUEST_ENTITY_TOO_LARGE;
+    message = "Request body is too large";
+  } else {
+    const dbError = handleDatabaseError(err);
+
+    if (dbError) {
+      statusCode = dbError.statusCode;
+      message = dbError.message;
+      errorSources = [...dbError.errorSources];
+    } else if (err instanceof Error) {
+      // অজানা error এর আসল message production এ লুকানো থাকবে
+      message = isDev ? err.message : "Internal server error";
+    }
+  }
+
+  if (errorSources.length === 0) {
+    errorSources = [{ path: "", message }];
+  }
+
+  if (!isDev && statusCode >= 500) {
+    console.error("Server error:", err);
   }
 
   const errorResponse: TErrorResponse = {
     success: false,
-    message: message,
+    message,
     errorSources,
-    error: envVars.NODE_ENV === "development" ? err : undefined,
-    stack: envVars.NODE_ENV === "development" ? stack : undefined,
+    error: isDev ? serializeError(err) : undefined,
+    stack: isDev ? stack : undefined,
   };
 
   res.status(statusCode).json(errorResponse);
