@@ -25,7 +25,7 @@ router.post("/logout", AuthController.logoutUser);
 router.get("/me", checkAuth("ADMIN", "STUDENT"), AuthController.getMe);
 
 router.post(
-  "/forger-password",
+  "/forget-password",
   RateLimiter.forgetPassword,
   validateRequest(AuthValidation.forgetPasswordZodSchema),
   AuthController.forgetPassword,
