@@ -1,25 +1,28 @@
-export type SortOrder = "asc" | "desc";
+export type TExpr = any;
+export type TFieldProxy = Record<string, any>;
 
-export interface PrismaFindManyArgs {
-  where?: Record<string, unknown>;
-  include?: Record<string, unknown>;
-  select?: Record<string, unknown>;
-  orderBy?: Record<string, unknown> | Record<string, unknown>[];
-  skip?: number;
-  take?: number;
-  cursor?: Record<string, unknown>;
-  distinct?: string[] | string;
-  [key: string]: unknown;
-}
+export type TWhereArg =
+  Record<string, unknown> | ((fields: TFieldProxy) => TExpr);
 
-export interface PrismaCountArgs {
-  where?: Record<string, unknown>;
-  [key: string]: unknown;
-}
+export type TOrderArg = (fields: TFieldProxy) => TExpr;
 
-export interface PrismaModelDelegate {
-  findMany(args?: any): Promise<any[]>;
-  count(args?: any): Promise<number>;
+export type TIncludeRefiner = (
+  collection: IQueryCollection,
+) => IQueryCollection;
+
+export type TIncludeConfig = Record<string, true | TIncludeRefiner>;
+
+export interface IQueryCollection {
+  where(condition: TWhereArg): IQueryCollection;
+  select(...fields: string[]): IQueryCollection;
+  include(relation: string, refine?: TIncludeRefiner): IQueryCollection;
+  orderBy(order: TOrderArg | TOrderArg[]): IQueryCollection;
+  limit(count: number): IQueryCollection;
+  offset(count: number): IQueryCollection;
+  all(): PromiseLike<any[]>;
+  aggregate(
+    builder: (a: any) => Record<string, any>,
+  ): PromiseLike<Record<string, any>>;
 }
 
 export interface IQueryParams {
@@ -27,55 +30,24 @@ export interface IQueryParams {
   page?: string;
   limit?: string;
   sortBy?: string;
-  sortOrder?: SortOrder;
+  sortOrder?: "asc" | "desc";
   fields?: string;
   include?: string;
-  includes?: string;
   [key: string]: unknown;
 }
+
+export type TFieldType = "string" | "number" | "boolean" | "date";
 
 export interface IQueryConfig {
   searchableFields?: string[];
   filterableFields?: string[];
   sortableFields?: string[];
-  selectableFields?: string[];
-  maxLimit?: number;
-  defaultLimit?: number;
+  defaultSelect?: string[];
   defaultSortBy?: string;
-  defaultSortOrder?: SortOrder;
-}
-
-export interface PrismaStringFilter {
-  contains?: string;
-  startsWith?: string;
-  endsWith?: string;
-  mode?: "insensitive" | "default";
-  equals?: string;
-  in?: string[];
-  notIn?: string[];
-  lt?: string;
-  lte?: string;
-  gt?: string;
-  gte?: string;
-  not?: PrismaStringFilter | string;
-}
-
-export interface PrismaNumberFilter {
-  equals?: number;
-  in?: number[];
-  notIn?: number[];
-  lt?: number;
-  lte?: number;
-  gt?: number;
-  gte?: number;
-  not?: PrismaNumberFilter | number;
-}
-
-export interface PrismaWhereConditions {
-  OR?: Record<string, unknown>[];
-  AND?: Record<string, unknown>[];
-  NOT?: Record<string, unknown>[];
-  [key: string]: unknown;
+  tieBreakerField?: string | null;
+  maxLimit?: number;
+  blockedFields?: string[];
+  fieldTypes?: Record<string, TFieldType>;
 }
 
 export interface IQueryResult<T> {

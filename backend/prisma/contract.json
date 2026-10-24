@@ -115,13 +115,6 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
-              },
-              "submittedAt": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamptz-temporal@1",
-                  "kind": "scalar"
-                }
               }
             },
             "relations": {
@@ -177,9 +170,6 @@
                 },
                 "submissionId": {
                   "column": "submissionId"
-                },
-                "submittedAt": {
-                  "column": "submittedAt"
                 }
               },
               "namespaceId": "public",
@@ -240,13 +230,6 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "submittedAt": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamptz-temporal@1",
                   "kind": "scalar"
                 }
               },
@@ -313,9 +296,6 @@
                 },
                 "studentId": {
                   "column": "studentId"
-                },
-                "submittedAt": {
-                  "column": "submittedAt"
                 },
                 "title": {
                   "column": "title"
@@ -560,15 +540,6 @@
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": false
-                },
-                "submittedAt": {
-                  "codecId": "pg/timestamptz-temporal@1",
-                  "dataType": "pg/timestamptz",
-                  "default": {
-                    "expression": "now()",
-                    "kind": "function"
-                  },
-                  "nullable": false
                 }
               },
               "foreignKeys": [
@@ -702,15 +673,6 @@
                 "studentId": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": false
-                },
-                "submittedAt": {
-                  "codecId": "pg/timestamptz-temporal@1",
-                  "dataType": "pg/timestamptz",
-                  "default": {
-                    "expression": "now()",
-                    "kind": "function"
-                  },
                   "nullable": false
                 },
                 "title": {
@@ -892,7 +854,11 @@
               "uniques": [
                 {
                   "columns": [
-                    "email",
+                    "email"
+                  ]
+                },
+                {
+                  "columns": [
                     "phone"
                   ]
                 }
@@ -928,7 +894,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "092faf76f71307271947ac7026a16e463c2233c7c327cdf7df5148c8ad395237"
+    "storageHash": "da430e8c81d56d403d2cd4c698bc34617ab836326eb5c03c6112039ba15067f8"
   },
   "execution": {
     "executionHash": "75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25",

@@ -2,11 +2,11 @@
 model User {
   id                String       @id @default(uuid())
   name              String
-  email             String
+  email             String       @unique
   password          String
   role              UserRole     @default(STUDENT)
   status            UserStatus   @default(ACTIVE)
-  phone             String
+  phone             String       @unique
   address           String?
   passwordChangedAt DateTime?
   resetOtpHash      String?
@@ -15,7 +15,6 @@ model User {
   reviews           Review[]
   createdAt         DateTime     @default(now())
 
-  @@unique([email, phone])
   @@index([role])
   @@index([status])
   @@map("user")
@@ -28,7 +27,6 @@ model Submission {
   githubUrl   String
   liveUrl     String
   status      SubmissionStatus @default(PENDING)
-  submittedAt DateTime         @default(now())
   studentId   String
   student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
   review      Review[]
@@ -47,7 +45,6 @@ model Review {
   status       SubmissionStatus @default(PENDING)
   feedback     String?
 
-  submittedAt  DateTime         @default(now())
   submissionId String
   submission   Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   reviewerId   String

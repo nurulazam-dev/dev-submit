@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'092faf76f71307271947ac7026a16e463c2233c7c327cdf7df5148c8ad395237'>;
+  StorageHashBase<'da430e8c81d56d403d2cd4c698bc34617ab836326eb5c03c6112039ba15067f8'>;
 export type ExecutionHash =
   ExecutionHashBase<'75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25'>;
 export type ProfileHash =
@@ -241,7 +241,6 @@ export type FieldOutputTypes = {
       readonly reviewerId: CodecTypes['pg/text@1']['output'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly submissionId: CodecTypes['pg/text@1']['output'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
     readonly Submission: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
@@ -251,7 +250,6 @@ export type FieldOutputTypes = {
       readonly liveUrl: CodecTypes['pg/text@1']['output'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly studentId: CodecTypes['pg/text@1']['output'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly title: CodecTypes['pg/text@1']['output'];
     };
     readonly User: {
@@ -279,7 +277,6 @@ export type FieldInputTypes = {
       readonly reviewerId: CodecTypes['pg/text@1']['input'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly submissionId: CodecTypes['pg/text@1']['input'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
     readonly Submission: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
@@ -289,7 +286,6 @@ export type FieldInputTypes = {
       readonly liveUrl: CodecTypes['pg/text@1']['input'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly studentId: CodecTypes['pg/text@1']['input'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly title: CodecTypes['pg/text@1']['input'];
     };
     readonly User: {
@@ -317,7 +313,6 @@ export type StorageColumnTypes = {
       readonly reviewerId: CodecTypes['pg/text@1']['output'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly submissionId: CodecTypes['pg/text@1']['output'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
     readonly submissions: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
@@ -327,7 +322,6 @@ export type StorageColumnTypes = {
       readonly liveUrl: CodecTypes['pg/text@1']['output'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly studentId: CodecTypes['pg/text@1']['output'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly title: CodecTypes['pg/text@1']['output'];
     };
     readonly user: {
@@ -355,7 +349,6 @@ export type StorageColumnInputTypes = {
       readonly reviewerId: CodecTypes['pg/text@1']['input'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly submissionId: CodecTypes['pg/text@1']['input'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
     readonly submissions: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
@@ -365,7 +358,6 @@ export type StorageColumnInputTypes = {
       readonly liveUrl: CodecTypes['pg/text@1']['input'];
       readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
       readonly studentId: CodecTypes['pg/text@1']['input'];
-      readonly submittedAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly title: CodecTypes['pg/text@1']['input'];
     };
     readonly user: {
@@ -393,7 +385,6 @@ export namespace Models {
     reviewerId: CodecTypes['pg/text@1']['output'];
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
     submissionId: CodecTypes['pg/text@1']['output'];
-    submittedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     reviewer: public_User;
     submission: public_Submission;
     readonly [RelationKeys]?: 'reviewer' | 'submission';
@@ -406,7 +397,6 @@ export namespace Models {
     liveUrl: CodecTypes['pg/text@1']['output'];
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
     studentId: CodecTypes['pg/text@1']['output'];
-    submittedAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     title: CodecTypes['pg/text@1']['output'];
     review: public_Review[];
     student: public_User;
@@ -498,13 +488,6 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly submittedAt: {
-                  readonly dataType: 'pg/timestamptz';
-                  readonly codecId: 'pg/timestamptz-temporal@1';
-                  readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly many: false;
                 };
               };
@@ -604,13 +587,6 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly submittedAt: {
-                  readonly dataType: 'pg/timestamptz';
-                  readonly codecId: 'pg/timestamptz-temporal@1';
-                  readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly many: false;
                 };
                 readonly title: {
@@ -736,7 +712,10 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['email', 'phone'] }];
+              uniques: readonly [
+                { readonly columns: readonly ['email'] },
+                { readonly columns: readonly ['phone'] },
+              ];
               indexes: readonly [
                 {
                   readonly name: 'user_role_idx_2c1ddf83';
@@ -818,13 +797,6 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly submittedAt: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-temporal@1';
-                };
-              };
             };
             readonly relations: {
               readonly reviewer: {
@@ -859,7 +831,6 @@ type ContractBase = Omit<
                 readonly reviewerId: { readonly column: 'reviewerId' };
                 readonly status: { readonly column: 'status' };
                 readonly submissionId: { readonly column: 'submissionId' };
-                readonly submittedAt: { readonly column: 'submittedAt' };
               };
             };
           };
@@ -895,13 +866,6 @@ type ContractBase = Omit<
               readonly studentId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly submittedAt: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-temporal@1';
-                };
               };
               readonly title: {
                 readonly nullable: false;
@@ -941,7 +905,6 @@ type ContractBase = Omit<
                 readonly liveUrl: { readonly column: 'liveUrl' };
                 readonly status: { readonly column: 'status' };
                 readonly studentId: { readonly column: 'studentId' };
-                readonly submittedAt: { readonly column: 'submittedAt' };
                 readonly title: { readonly column: 'title' };
               };
             };

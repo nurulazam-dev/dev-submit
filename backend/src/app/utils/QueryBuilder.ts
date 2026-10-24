@@ -1,17 +1,22 @@
+import { and, or } from "@prisma/orm-postgres/orm-client";
+import status from "http-status";
+import AppError from "../errorHelpers/AppError";
 import {
+  IQueryCollection,
   IQueryConfig,
   IQueryParams,
   IQueryResult,
-  PrismaCountArgs,
-  PrismaFindManyArgs,
-  PrismaModelDelegate,
-  // PrismaNumberFilter,
-  PrismaStringFilter,
-  // PrismaWhereConditions,
-  SortOrder,
+  TExpr,
+  TFieldProxy,
+  TIncludeConfig,
+  TOrderArg,
+  TWhereArg,
 } from "../interfaces/query.interface";
 
-const RESERVED_QUERY_KEYS = new Set([
+const orAll = or as unknown as (...exprs: TExpr[]) => TExpr;
+const andAll = and as unknown as (...exprs: TExpr[]) => TExpr;
+
+const RESERVED_PARAMS = [
   "searchTerm",
   "page",
   "limit",
@@ -19,459 +24,423 @@ const RESERVED_QUERY_KEYS = new Set([
   "sortOrder",
   "fields",
   "include",
-  "includes",
-]);
+];
 
-export class QueryBuilder<
-  T,
-  TWhereInput = Record<string, unknown>,
-  TInclude = Record<string, unknown>,
-> {
-  private query: PrismaFindManyArgs;
-  private countQuery: PrismaCountArgs;
+const DEFAULT_BLOCKED_FIELDS = [
+  "password",
+  "resetOtpHash",
+  "resetOtpExpiresAt",
+];
+
+const UNSAFE_SEGMENTS = ["__proto__", "constructor", "prototype"];
+const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const NUMBER_PATTERN = /^-?(0|[1-9]\d*)(\.\d+)?$/;
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|[+-]\d{2}:?\d{2})?)?$/;
+const COMPARISON_OPERATORS = ["lt", "lte", "gt", "gte"];
+
+type TStep = (collection: IQueryCollection) => IQueryCollection;
+
+const badRequest = (message: string) =>
+  new AppError(status.BAD_REQUEST, message);
+
+export class QueryBuilder<T> {
+  private whereSteps: TStep[] = [];
+  private includeSteps = new Map<string, TStep>();
+  private selectedFields: string[] | undefined;
+  private orderFns: TOrderArg[] = [];
   private page = 1;
-  private limit = 10;
-  private skip = 0;
-  private sortBy = "createdAt";
-  private sortOrder: SortOrder = "desc";
-  private selectFields?: Record<string, boolean>;
+  private limitValue = 10;
 
   constructor(
-    private readonly model: PrismaModelDelegate,
-    private readonly queryParams: IQueryParams,
-    private readonly config: IQueryConfig = {},
-  ) {
-    this.query = {
-      where: {},
-      include: {},
-      orderBy: {},
-      skip: 0,
-      take: this.config.defaultLimit ?? 10,
-    };
+    private model: IQueryCollection,
+    private queryParams: IQueryParams,
+    private config: IQueryConfig = {},
+  ) {}
 
-    this.countQuery = { where: {} };
-    this.limit = this.config.defaultLimit ?? 10;
-    this.query.take = this.limit;
-  }
+  // ---------------- search ----------------
 
   search(): this {
-    const searchTerm = this.asNonEmptyString(this.queryParams.searchTerm);
-    const searchableFields = this.config.searchableFields ?? [];
+    const { searchTerm } = this.queryParams;
+    const { searchableFields } = this.config;
 
-    if (!searchTerm || searchableFields.length === 0) return this;
+    if (
+      typeof searchTerm === "string" &&
+      searchTerm.trim() !== "" &&
+      searchableFields &&
+      searchableFields.length > 0
+    ) {
+      searchableFields.forEach((f) => this.assertAllowedPath(f));
 
-    const searchConditions = searchableFields
-      .map((field) => this.buildSearchCondition(field, searchTerm))
-      .filter(
-        (condition): condition is Record<string, unknown> =>
-          condition !== undefined,
+      const pattern = `%${this.escapeLike(searchTerm.trim())}%`;
+
+      this.whereSteps.push((c) =>
+        c.where((p) => {
+          const exprs = searchableFields.map((f) =>
+            this.field(p, f).ilike(pattern),
+          );
+          return exprs.length === 1 ? exprs[0] : orAll(...exprs);
+        }),
       );
-
-    if (searchConditions.length === 0) return this;
-
-    this.mergeWhere({ OR: searchConditions });
-    return this;
-  }
-
-  filter(): this {
-    const filterableFields = this.config.filterableFields;
-    const where = this.query.where as Record<string, unknown>;
-
-    for (const [key, rawValue] of Object.entries(this.queryParams)) {
-      if (
-        RESERVED_QUERY_KEYS.has(key) ||
-        rawValue === undefined ||
-        rawValue === ""
-      ) {
-        continue;
-      }
-
-      if (filterableFields?.length && !filterableFields.includes(key)) {
-        continue;
-      }
-
-      if (key.includes(".")) {
-        if (filterableFields?.length && !filterableFields.includes(key)) {
-          continue;
-        }
-
-        const nestedCondition = this.buildNestedFilter(key, rawValue);
-        if (nestedCondition) this.mergeWhere(nestedCondition);
-        continue;
-      }
-
-      const parsedValue = this.parseFilterValue(rawValue);
-      if (parsedValue !== undefined) {
-        where[key] = parsedValue;
-      }
     }
 
-    this.countQuery.where = this.deepMerge(
-      (this.countQuery.where ?? {}) as Record<string, unknown>,
-      where,
-    );
+    return this;
+  }
+
+  // ---------------- filter ----------------
+
+  filter(): this {
+    const { filterableFields } = this.config;
+
+    Object.entries(this.queryParams).forEach(([key, value]) => {
+      if (RESERVED_PARAMS.includes(key)) return;
+      if (value === undefined || value === "") return;
+
+      if (
+        filterableFields &&
+        filterableFields.length > 0 &&
+        !filterableFields.includes(key)
+      ) {
+        return;
+      }
+
+      this.assertAllowedPath(key);
+
+      this.whereSteps.push((c) =>
+        c.where((p) => this.buildFilterExpr(this.field(p, key), key, value)),
+      );
+    });
 
     return this;
   }
 
-  paginate(): this {
-    const requestedPage = this.parsePositiveInteger(this.queryParams.page, 1);
-    const configuredDefault = this.config.defaultLimit ?? 10;
-    const maxLimit = this.config.maxLimit ?? 100;
-    const requestedLimit = this.parsePositiveInteger(
-      this.queryParams.limit,
-      configuredDefault,
-    );
-
-    this.page = requestedPage;
-    this.limit = Math.min(requestedLimit, maxLimit);
-    this.skip = (this.page - 1) * this.limit;
-
-    this.query.skip = this.skip;
-    this.query.take = this.limit;
-
-    return this;
-  }
+  // ---------------- sort ----------------
 
   sort(): this {
-    const requestedSortBy =
-      this.asNonEmptyString(this.queryParams.sortBy) ??
-      this.config.defaultSortBy ??
-      "createdAt";
-    const requestedSortOrder =
-      this.queryParams.sortOrder === "asc"
-        ? "asc"
-        : (this.config.defaultSortOrder ?? "desc");
+    const sortBy =
+      this.queryParams.sortBy || this.config.defaultSortBy || "createdAt";
+    const direction = this.queryParams.sortOrder === "asc" ? "asc" : "desc";
 
-    const sortableFields = this.config.sortableFields;
-    const allowedSortBy =
-      !sortableFields?.length || sortableFields.includes(requestedSortBy)
-        ? requestedSortBy
-        : (this.config.defaultSortBy ?? "createdAt");
+    this.assertAllowedPath(sortBy);
 
-    this.sortBy = allowedSortBy;
-    this.sortOrder = requestedSortOrder;
+    const { sortableFields } = this.config;
+    if (
+      this.queryParams.sortBy &&
+      sortableFields &&
+      sortableFields.length > 0 &&
+      !sortableFields.includes(sortBy)
+    ) {
+      throw badRequest(`Sorting by "${sortBy}" is not allowed`);
+    }
 
-    this.query.orderBy = this.buildOrderBy(this.sortBy, this.sortOrder);
+    const makeOrder =
+      (path: string): TOrderArg =>
+      (p) =>
+        this.field(p, path)[direction]();
+
+    this.orderFns = [makeOrder(sortBy)];
+
+    const tieBreaker =
+      this.config.tieBreakerField === undefined
+        ? "id"
+        : this.config.tieBreakerField;
+
+    if (tieBreaker && tieBreaker !== sortBy) {
+      this.orderFns.push(makeOrder(tieBreaker));
+    }
+
     return this;
   }
+
+  // ---------------- paginate ----------------
+
+  paginate(): this {
+    const maxLimit = this.config.maxLimit ?? 50;
+
+    this.page = Math.max(1, Math.floor(Number(this.queryParams.page)) || 1);
+    this.limitValue = Math.min(
+      maxLimit,
+      Math.max(1, Math.floor(Number(this.queryParams.limit)) || 10),
+    );
+
+    return this;
+  }
+
+  // ---------------- fields (select) ----------------
 
   fields(): this {
-    const fieldsParam = this.asNonEmptyString(this.queryParams.fields);
-    if (!fieldsParam) return this;
+    const param = this.queryParams.fields;
 
-    const requestedFields = fieldsParam
-      .split(",")
-      .map((field) => field.trim())
-      .filter(Boolean);
+    const requested =
+      typeof param === "string"
+        ? param
+            .split(",")
+            .map((f) => f.trim())
+            .filter(Boolean)
+        : [];
 
-    const selectableFields = this.config.selectableFields;
-    const fields = requestedFields.filter(
-      (field) => !selectableFields?.length || selectableFields.includes(field),
-    );
+    if (requested.length > 0) {
+      const blocked = this.blockedSet();
 
-    if (fields.length === 0) return this;
+      requested.forEach((f) => {
+        if (!IDENTIFIER.test(f) || blocked.has(f)) {
+          throw badRequest(`Invalid field: ${f}`);
+        }
+      });
 
-    this.selectFields = Object.fromEntries(
-      fields.map((field) => [field, true]),
-    );
-    this.query.select = this.selectFields;
-
-    delete this.query.include;
+      this.selectedFields = requested;
+    } else if (this.config.defaultSelect && this.config.defaultSelect.length) {
+      this.selectedFields = this.config.defaultSelect;
+    }
 
     return this;
   }
 
-  include(relation: TInclude): this {
-    if (this.selectFields) return this;
+  // ---------------- include ----------------
 
-    const existing = (this.query.include ?? {}) as Record<string, unknown>;
-    this.query.include = this.deepMerge(
-      existing,
-      relation as Record<string, unknown>,
+  include(config: TIncludeConfig): this {
+    Object.entries(config).forEach(([name, refine]) =>
+      this.addInclude(name, refine),
     );
-
     return this;
   }
 
   dynamicInclude(
-    includeConfig: Record<string, unknown>,
+    includeConfig: TIncludeConfig,
     defaultInclude: string[] = [],
   ): this {
-    if (this.selectFields) return this;
+    const param = this.queryParams.include;
 
-    const result: Record<string, unknown> = {};
-    for (const relation of defaultInclude) {
-      if (Object.prototype.hasOwnProperty.call(includeConfig, relation)) {
-        result[relation] = includeConfig[relation];
+    const requested =
+      typeof param === "string"
+        ? param
+            .split(",")
+            .map((r) => r.trim())
+            .filter(Boolean)
+        : [];
+
+    [...new Set([...defaultInclude, ...requested])].forEach((name) => {
+      if (Object.prototype.hasOwnProperty.call(includeConfig, name)) {
+        this.addInclude(name, includeConfig[name] as TIncludeConfig[string]);
       }
-    }
-
-    const includeParam =
-      this.asNonEmptyString(this.queryParams.include) ??
-      this.asNonEmptyString(this.queryParams.includes);
-
-    if (includeParam) {
-      for (const relation of includeParam
-        .split(",")
-        .map((item) => item.trim())) {
-        if (Object.prototype.hasOwnProperty.call(includeConfig, relation)) {
-          result[relation] = includeConfig[relation];
-        }
-      }
-    }
-
-    this.query.include = this.deepMerge(
-      (this.query.include ?? {}) as Record<string, unknown>,
-      result,
-    );
+    });
 
     return this;
   }
 
-  where(condition: TWhereInput): this {
-    const record = condition as Record<string, unknown>;
-    this.query.where = this.deepMerge(
-      (this.query.where ?? {}) as Record<string, unknown>,
-      record,
-    );
-    this.countQuery.where = this.deepMerge(
-      (this.countQuery.where ?? {}) as Record<string, unknown>,
-      record,
-    );
+  // ---------------- custom where ----------------
 
+  where(condition: TWhereArg): this {
+    this.whereSteps.push((c) => c.where(condition));
     return this;
   }
+
+  // ---------------- run ----------------
 
   async execute(): Promise<IQueryResult<T>> {
     const [total, data] = await Promise.all([
-      this.model.count(this.countQuery),
-      this.model.findMany(this.query),
+      this.count(),
+      this.buildCollection().all(),
     ]);
 
     return {
       data: data as T[],
       meta: {
         page: this.page,
-        limit: this.limit,
+        limit: this.limitValue,
         total,
-        totalPages: total === 0 ? 0 : Math.ceil(total / this.limit),
+        totalPages: Math.ceil(total / this.limitValue),
       },
     };
   }
 
   async count(): Promise<number> {
-    return this.model.count(this.countQuery);
+    const result = await this.applyWhere().aggregate((a) => ({
+      total: a.count(),
+    }));
+
+    return Number(result.total ?? 0);
   }
 
-  getQuery(): PrismaFindManyArgs {
-    return this.query;
+  buildCollection(): IQueryCollection {
+    let collection = this.applyWhere();
+
+    if (this.selectedFields) {
+      collection = collection.select(...this.selectedFields);
+    } else {
+      this.includeSteps.forEach((step) => {
+        collection = step(collection);
+      });
+    }
+
+    if (this.orderFns.length > 0) {
+      collection = collection.orderBy(
+        this.orderFns.length === 1
+          ? (this.orderFns[0] as TOrderArg)
+          : this.orderFns,
+      );
+    }
+
+    return collection
+      .limit(this.limitValue)
+      .offset((this.page - 1) * this.limitValue);
   }
 
-  private mergeWhere(condition: Record<string, unknown>): void {
-    this.query.where = this.deepMerge(
-      (this.query.where ?? {}) as Record<string, unknown>,
-      condition,
+  // ---------------- private helpers ----------------
+
+  private applyWhere(): IQueryCollection {
+    return this.whereSteps.reduce((c, step) => step(c), this.model);
+  }
+
+  private addInclude(name: string, refine: TIncludeConfig[string]) {
+    this.includeSteps.set(
+      name,
+      refine === true ? (c) => c.include(name) : (c) => c.include(name, refine),
     );
-    this.countQuery.where = this.deepMerge(
-      (this.countQuery.where ?? {}) as Record<string, unknown>,
-      condition,
-    );
   }
 
-  private buildSearchCondition(
-    field: string,
-    searchTerm: string,
-  ): Record<string, unknown> | undefined {
-    const parts = field.split(".").filter(Boolean);
-    const stringFilter: PrismaStringFilter = {
-      contains: searchTerm,
-      mode: "insensitive",
-    };
-
-    if (parts.length === 1) {
-      return { [parts[0]]: stringFilter };
-    }
-
-    if (parts.length === 2) {
-      return {
-        [parts[0]]: {
-          [parts[1]]: stringFilter,
-        },
-      };
-    }
-
-    if (parts.length === 3) {
-      return {
-        [parts[0]]: {
-          some: {
-            [parts[1]]: {
-              [parts[2]]: stringFilter,
-            },
-          },
-        },
-      };
-    }
-
-    return undefined;
-  }
-
-  private buildNestedFilter(
-    dottedKey: string,
-    rawValue: unknown,
-  ): Record<string, unknown> | undefined {
-    const parts = dottedKey.split(".").filter(Boolean);
-    if (parts.length < 2 || parts.length > 3) return undefined;
-
-    const value = this.parseFilterValue(rawValue);
-    if (value === undefined) return undefined;
-
-    if (parts.length === 2) {
-      return {
-        [parts[0]]: {
-          [parts[1]]: value,
-        },
-      };
-    }
-
-    return {
-      [parts[0]]: {
-        some: {
-          [parts[1]]: {
-            [parts[2]]: value,
-          },
-        },
-      },
-    };
-  }
-
-  private buildOrderBy(
-    field: string,
-    order: SortOrder,
-  ): Record<string, unknown> {
-    const parts = field.split(".").filter(Boolean);
-
-    if (parts.length === 2) {
-      return { [parts[0]]: { [parts[1]]: order } };
-    }
-
-    if (parts.length === 3) {
-      return {
-        [parts[0]]: {
-          [parts[1]]: { [parts[2]]: order },
-        },
-      };
-    }
-
-    return { [field]: order };
-  }
-
-  private parseFilterValue(value: unknown): unknown {
-    if (Array.isArray(value)) {
-      return { in: value.map((item) => this.parseScalar(item)) };
-    }
-
-    if (typeof value === "object" && value !== null) {
-      return this.parseRangeFilter(value as Record<string, unknown>);
-    }
-
-    return this.parseScalar(value);
-  }
-
-  private parseScalar(value: unknown): unknown {
-    if (typeof value !== "string") return value;
-
-    if (value === "true") return true;
-    if (value === "false") return false;
-
-    return value;
-  }
-
-  private parseRangeFilter(
-    value: Record<string, unknown>,
-  ): Record<string, unknown> {
-    const allowedOperators = new Set([
-      "lt",
-      "lte",
-      "gt",
-      "gte",
-      "equals",
-      "not",
-      "contains",
-      "startsWith",
-      "endsWith",
-      "in",
-      "notIn",
+  private blockedSet() {
+    return new Set([
+      ...DEFAULT_BLOCKED_FIELDS,
+      ...(this.config.blockedFields ?? []),
     ]);
+  }
 
-    const result: Record<string, unknown> = {};
+  private assertAllowedPath(path: string) {
+    const segments = path.split(".");
+    const blocked = this.blockedSet();
 
-    for (const [operator, rawValue] of Object.entries(value)) {
-      if (!allowedOperators.has(operator) || rawValue === undefined) continue;
+    if (
+      segments.length > 2 ||
+      segments.some(
+        (s) =>
+          !IDENTIFIER.test(s) || UNSAFE_SEGMENTS.includes(s) || blocked.has(s),
+      )
+    ) {
+      throw badRequest(`Invalid field: ${path}`);
+    }
+  }
 
-      if (operator === "in" || operator === "notIn") {
-        const values = Array.isArray(rawValue)
-          ? rawValue
-          : String(rawValue).split(",");
-        result[operator] = values.map((item) => this.parseScalar(item));
-        continue;
+  private field(fields: TFieldProxy, path: string) {
+    let current: any = fields;
+
+    for (const segment of path.split(".")) {
+      current = current?.[segment];
+    }
+
+    if (!current || typeof current.eq !== "function") {
+      throw badRequest(`Invalid field: ${path}`);
+    }
+
+    return current;
+  }
+
+  private escapeLike(value: string) {
+    return value.replace(/[\\%_]/g, "\\$&");
+  }
+
+  private toArray(raw: unknown): unknown[] {
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === "string") return raw.split(",");
+    return [raw];
+  }
+
+  private buildFilterExpr(field: any, key: string, value: unknown): TExpr {
+    if (Array.isArray(value)) {
+      return field.in(value.map((v) => this.parseValue(key, v)));
+    }
+
+    if (value && typeof value === "object") {
+      const exprs = Object.entries(value as Record<string, unknown>).map(
+        ([op, raw]) => this.applyOperator(field, key, op, raw),
+      );
+
+      if (exprs.length === 0) {
+        throw badRequest(`Invalid filter for ${key}`);
       }
 
-      if (
-        ["lt", "lte", "gt", "gte", "equals", "not"].includes(operator) &&
-        typeof rawValue === "string" &&
-        rawValue.trim() !== "" &&
-        Number.isFinite(Number(rawValue))
-      ) {
-        result[operator] = Number(rawValue);
-      } else {
-        result[operator] = this.parseScalar(rawValue);
+      return exprs.length === 1 ? exprs[0] : andAll(...exprs);
+    }
+
+    return field.eq(this.parseValue(key, value));
+  }
+
+  private applyOperator(
+    field: any,
+    key: string,
+    op: string,
+    raw: unknown,
+  ): TExpr {
+    switch (op) {
+      case "eq":
+      case "equals":
+        return field.eq(this.parseValue(key, raw, op));
+      case "ne":
+      case "neq":
+      case "not":
+        return field.neq(this.parseValue(key, raw, op));
+      case "lt":
+        return field.lt(this.parseValue(key, raw, op));
+      case "lte":
+        return field.lte(this.parseValue(key, raw, op));
+      case "gt":
+        return field.gt(this.parseValue(key, raw, op));
+      case "gte":
+        return field.gte(this.parseValue(key, raw, op));
+      case "contains":
+        return field.ilike(`%${this.escapeLike(String(raw))}%`);
+      case "startsWith":
+        return field.ilike(`${this.escapeLike(String(raw))}%`);
+      case "endsWith":
+        return field.ilike(`%${this.escapeLike(String(raw))}`);
+      case "in":
+        return field.in(this.toArray(raw).map((v) => this.parseValue(key, v)));
+      case "notIn":
+        return field.notIn(
+          this.toArray(raw).map((v) => this.parseValue(key, v)),
+        );
+      case "isNull":
+        return String(raw) === "false" ? field.isNotNull() : field.isNull();
+      default:
+        throw badRequest(`Unsupported operator "${op}" for ${key}`);
+    }
+  }
+
+  private parseValue(key: string, raw: unknown, op?: string): unknown {
+    if (typeof raw !== "string") return raw;
+
+    switch (this.config.fieldTypes?.[key]) {
+      case "string":
+        return raw;
+      case "number": {
+        const n = Number(raw);
+        if (Number.isNaN(n)) throw badRequest(`${key} must be a number`);
+        return n;
+      }
+      case "boolean":
+        if (raw === "true") return true;
+        if (raw === "false") return false;
+        throw badRequest(`${key} must be true or false`);
+      case "date": {
+        const d = new Date(raw);
+        if (Number.isNaN(d.getTime()))
+          throw badRequest(`${key} must be a date`);
+        return d;
       }
     }
 
-    return Object.keys(result).length > 0 ? result : value;
-  }
+    if (raw === "true") return true;
+    if (raw === "false") return false;
 
-  private parsePositiveInteger(value: unknown, fallback: number): number {
-    if (typeof value !== "string" && typeof value !== "number") return fallback;
-
-    const parsed = Number(value);
-    if (!Number.isInteger(parsed) || parsed < 1) return fallback;
-
-    return parsed;
-  }
-
-  private asNonEmptyString(value: unknown): string | undefined {
-    if (typeof value !== "string") return undefined;
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : undefined;
-  }
-
-  private deepMerge(
-    target: Record<string, unknown>,
-    source: Record<string, unknown>,
-  ): Record<string, unknown> {
-    const result: Record<string, unknown> = { ...target };
-
-    for (const [key, sourceValue] of Object.entries(source)) {
-      const targetValue = result[key];
-
-      if (this.isPlainObject(targetValue) && this.isPlainObject(sourceValue)) {
-        result[key] = this.deepMerge(targetValue, sourceValue);
-      } else {
-        result[key] = sourceValue;
-      }
+    if (NUMBER_PATTERN.test(raw)) {
+      const n = Number(raw);
+      if (raw.includes(".") || Number.isSafeInteger(n)) return n;
     }
 
-    return result;
-  }
-
-  private isPlainObject(value: unknown): value is Record<string, unknown> {
-    if (value === null || typeof value !== "object" || Array.isArray(value)) {
-      return false;
+    if (op && COMPARISON_OPERATORS.includes(op) && ISO_DATE_PATTERN.test(raw)) {
+      const d = new Date(raw);
+      if (!Number.isNaN(d.getTime())) return d;
     }
 
-    const prototype = Object.getPrototypeOf(value);
-    return prototype === Object.prototype || prototype === null;
+    return raw;
   }
 }
