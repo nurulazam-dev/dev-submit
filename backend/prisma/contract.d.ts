@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'da430e8c81d56d403d2cd4c698bc34617ab836326eb5c03c6112039ba15067f8'>;
+  StorageHashBase<'718433a1502c1cdfc5455514af7d4b6174156163e87b7cf37d7a30cc56bf2ccc'>;
 export type ExecutionHash =
   ExecutionHashBase<'75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25'>;
 export type ProfileHash =
@@ -599,6 +599,19 @@ type ContractBase = Omit<
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
               indexes: readonly [
+                {
+                  readonly name: 'one_pending_submission_per_student_89ecac1f';
+                  readonly prefix: 'one_pending_submission_per_student';
+                  readonly columns: readonly ['studentId'];
+                  readonly where: '("status" = \'PENDING\')';
+                  readonly unique: true;
+                },
+                {
+                  readonly name: 'submission_github_url_unique_7c3d0ef1';
+                  readonly prefix: 'submission_github_url_unique';
+                  readonly columns: readonly ['githubUrl'];
+                  readonly unique: true;
+                },
                 {
                   readonly name: 'submissions_status_idx_e98638ab';
                   readonly prefix: 'submissions_status_idx';

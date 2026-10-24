@@ -36,6 +36,12 @@ model Submission {
   @@index([studentId])
   @@index([status])
 
+  // A GitHub URL can only be submitted once globally.
+  @@index([githubUrl], unique: true, name: "submission_github_url_unique")
+
+  // A student can have only one PENDING submission.
+  @@index([studentId], unique: true, where: sql`("status" = 'PENDING')`, name: "one_pending_submission_per_student")
+
   @@map("submissions")
 }
 

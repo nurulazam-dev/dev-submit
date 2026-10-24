@@ -1,0 +1,80 @@
+[
+  {
+    "id": "index.submissions.one_pending_submission_per_student_89ecac1f",
+    "label": "Create index \"one_pending_submission_per_student_89ecac1f\" on \"submissions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "one_pending_submission_per_student_89ecac1f",
+        "table": "submissions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"one_pending_submission_per_student_89ecac1f\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"one_pending_submission_per_student_89ecac1f\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"one_pending_submission_per_student_89ecac1f\"",
+        "sql": "CREATE UNIQUE INDEX \"one_pending_submission_per_student_89ecac1f\" ON \"public\".\"submissions\" (\"studentId\") WHERE ((\"status\" = 'PENDING'))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"one_pending_submission_per_student_89ecac1f\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"one_pending_submission_per_student_89ecac1f\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.submissions.submission_github_url_unique_7c3d0ef1",
+    "label": "Create index \"submission_github_url_unique_7c3d0ef1\" on \"submissions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "submission_github_url_unique_7c3d0ef1",
+        "table": "submissions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"submission_github_url_unique_7c3d0ef1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"submission_github_url_unique_7c3d0ef1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"submission_github_url_unique_7c3d0ef1\"",
+        "sql": "CREATE UNIQUE INDEX \"submission_github_url_unique_7c3d0ef1\" ON \"public\".\"submissions\" (\"githubUrl\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"submission_github_url_unique_7c3d0ef1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"submission_github_url_unique_7c3d0ef1\""
+        ]
+      }
+    ]
+  }
+]

@@ -11,6 +11,17 @@ const login = rateLimit({
   },
 });
 
+const submission = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many submit attempts. Please try again after 15 minutes.",
+  },
+});
+
 const forgetPassword = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
@@ -39,4 +50,5 @@ export const RateLimiter = {
   login,
   resetPassword,
   forgetPassword,
+  submission,
 };

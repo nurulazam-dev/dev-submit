@@ -706,6 +706,23 @@
               "indexes": [
                 {
                   "columns": [
+                    "studentId"
+                  ],
+                  "name": "one_pending_submission_per_student_89ecac1f",
+                  "prefix": "one_pending_submission_per_student",
+                  "unique": true,
+                  "where": "(\"status\" = 'PENDING')"
+                },
+                {
+                  "columns": [
+                    "githubUrl"
+                  ],
+                  "name": "submission_github_url_unique_7c3d0ef1",
+                  "prefix": "submission_github_url_unique",
+                  "unique": true
+                },
+                {
+                  "columns": [
                     "status"
                   ],
                   "name": "submissions_status_idx_e98638ab",
@@ -894,7 +911,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "da430e8c81d56d403d2cd4c698bc34617ab836326eb5c03c6112039ba15067f8"
+    "storageHash": "718433a1502c1cdfc5455514af7d4b6174156163e87b7cf37d7a30cc56bf2ccc"
   },
   "execution": {
     "executionHash": "75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25",
