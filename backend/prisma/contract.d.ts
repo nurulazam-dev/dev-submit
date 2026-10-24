@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'718433a1502c1cdfc5455514af7d4b6174156163e87b7cf37d7a30cc56bf2ccc'>;
+  StorageHashBase<'b36fb4756a2ec0e8769d128d2bfefba215f5404c2cc3c9c3d001d7db5784896e'>;
 export type ExecutionHash =
   ExecutionHashBase<'75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25'>;
 export type ProfileHash =
@@ -236,10 +236,10 @@ export type FieldOutputTypes = {
   readonly public: {
     readonly Review: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly feedback: CodecTypes['pg/text@1']['output'] | null;
+      readonly feedback: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly reviewerId: CodecTypes['pg/text@1']['output'];
-      readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
+      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['output'];
     };
     readonly Submission: {
@@ -272,10 +272,10 @@ export type FieldInputTypes = {
   readonly public: {
     readonly Review: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly feedback: CodecTypes['pg/text@1']['input'] | null;
+      readonly feedback: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly reviewerId: CodecTypes['pg/text@1']['input'];
-      readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
+      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['input'];
     };
     readonly Submission: {
@@ -308,10 +308,10 @@ export type StorageColumnTypes = {
   readonly public: {
     readonly reviews: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly feedback: CodecTypes['pg/text@1']['output'] | null;
+      readonly feedback: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly reviewerId: CodecTypes['pg/text@1']['output'];
-      readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
+      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['output'];
     };
     readonly submissions: {
@@ -344,10 +344,10 @@ export type StorageColumnInputTypes = {
   readonly public: {
     readonly reviews: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly feedback: CodecTypes['pg/text@1']['input'] | null;
+      readonly feedback: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly reviewerId: CodecTypes['pg/text@1']['input'];
-      readonly status: 'PENDING' | 'APPROVED' | 'REJECTED';
+      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['input'];
     };
     readonly submissions: {
@@ -380,10 +380,10 @@ export type StorageColumnInputTypes = {
 export namespace Models {
   export type public_Review = {
     createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    feedback: CodecTypes['pg/text@1']['output'] | null;
+    feedback: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/text@1']['output'];
     reviewerId: CodecTypes['pg/text@1']['output'];
-    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
     submissionId: CodecTypes['pg/text@1']['output'];
     reviewer: public_User;
     submission: public_Submission;
@@ -459,7 +459,7 @@ type ContractBase = Omit<
                 readonly feedback: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
+                  readonly nullable: false;
                   readonly many: false;
                 };
                 readonly id: {
@@ -747,6 +747,10 @@ type ContractBase = Omit<
             };
           };
           readonly valueSet: {
+            readonly ReviewStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
+            };
             readonly SubmissionStatus: {
               readonly kind: 'valueSet';
               readonly values: readonly ['PENDING', 'APPROVED', 'REJECTED'];
@@ -791,7 +795,7 @@ type ContractBase = Omit<
                 };
               };
               readonly feedback: {
-                readonly nullable: true;
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly id: {
@@ -1027,6 +1031,14 @@ type ContractBase = Omit<
           };
         };
         readonly enum: {
+          readonly ReviewStatus: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'PENDING'; readonly value: 'PENDING' },
+              { readonly name: 'IN_PROGRESS'; readonly value: 'IN_PROGRESS' },
+              { readonly name: 'COMPLETED'; readonly value: 'COMPLETED' },
+            ];
+          };
           readonly SubmissionStatus: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
@@ -1051,6 +1063,11 @@ type ContractBase = Omit<
           };
         };
         readonly enumMemberTypes?: {
+          readonly ReviewStatus: readonly [
+            { readonly name: 'PENDING'; readonly value: 'PENDING' },
+            { readonly name: 'IN_PROGRESS'; readonly value: 'IN_PROGRESS' },
+            { readonly name: 'COMPLETED'; readonly value: 'COMPLETED' },
+          ];
           readonly SubmissionStatus: readonly [
             { readonly name: 'PENDING'; readonly value: 'PENDING' },
             { readonly name: 'APPROVED'; readonly value: 'APPROVED' },

@@ -21,6 +21,23 @@
     "namespaces": {
       "public": {
         "enum": {
+          "ReviewStatus": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "PENDING",
+                "value": "PENDING"
+              },
+              {
+                "name": "IN_PROGRESS",
+                "value": "IN_PROGRESS"
+              },
+              {
+                "name": "COMPLETED",
+                "value": "COMPLETED"
+              }
+            ]
+          },
           "SubmissionStatus": {
             "codecId": "pg/text@1",
             "members": [
@@ -76,7 +93,7 @@
                 }
               },
               "feedback": {
-                "nullable": true,
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -104,7 +121,7 @@
                 },
                 "valueSet": {
                   "entityKind": "enum",
-                  "entityName": "SubmissionStatus",
+                  "entityName": "ReviewStatus",
                   "namespaceId": "public",
                   "plane": "domain"
                 }
@@ -491,8 +508,8 @@
             "reviews": {
               "checks": [
                 {
-                  "expression": "\"status\" IN ('PENDING', 'APPROVED', 'REJECTED')",
-                  "name": "reviews_status_check_56005a61",
+                  "expression": "\"status\" IN ('PENDING', 'IN_PROGRESS', 'COMPLETED')",
+                  "name": "reviews_status_check_c95d195d",
                   "prefix": "reviews_status_check"
                 }
               ],
@@ -509,7 +526,7 @@
                 "feedback": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": true
+                  "nullable": false
                 },
                 "id": {
                   "codecId": "pg/text@1",
@@ -531,7 +548,7 @@
                   "nullable": false,
                   "valueSet": {
                     "entityKind": "valueSet",
-                    "entityName": "SubmissionStatus",
+                    "entityName": "ReviewStatus",
                     "namespaceId": "public",
                     "plane": "storage"
                   }
@@ -883,6 +900,14 @@
             }
           },
           "valueSet": {
+            "ReviewStatus": {
+              "kind": "valueSet",
+              "values": [
+                "PENDING",
+                "IN_PROGRESS",
+                "COMPLETED"
+              ]
+            },
             "SubmissionStatus": {
               "kind": "valueSet",
               "values": [
@@ -911,7 +936,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "718433a1502c1cdfc5455514af7d4b6174156163e87b7cf37d7a30cc56bf2ccc"
+    "storageHash": "b36fb4756a2ec0e8769d128d2bfefba215f5404c2cc3c9c3d001d7db5784896e"
   },
   "execution": {
     "executionHash": "75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25",

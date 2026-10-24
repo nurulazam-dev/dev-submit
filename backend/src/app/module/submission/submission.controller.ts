@@ -5,7 +5,7 @@ import { SubmissionService } from "./submission.service";
 import { sendResponse } from "../../shared/sendResponse";
 import { IQueryParams } from "../../interfaces/query.interface";
 
-const createSubmissions = catchAsync(async (req: Request, res: Response) => {
+const createSubmission = catchAsync(async (req: Request, res: Response) => {
   const result = await SubmissionService.createSubmission(
     req.body,
     req.user?.userId as string,
@@ -83,7 +83,7 @@ const adminUpdateSubmissionById = catchAsync(
 );
 
 export const SubmissionController = {
-  createSubmissions,
+  createSubmission,
   getAllSubmissions,
   getSubmissionById,
   adminUpdateSubmissionById,

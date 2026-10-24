@@ -11,7 +11,7 @@ router.post(
   "/create",
   RateLimiter.submission,
   checkAuth("STUDENT"),
-  SubmissionController.createSubmissions,
+  SubmissionController.createSubmission,
 );
 
 router.get(
