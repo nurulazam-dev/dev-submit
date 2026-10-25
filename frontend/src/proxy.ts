@@ -5,160 +5,203 @@ import {
   getDefaultDashboardRoute,
   getRouteOwner,
   isAuthRoute,
-  UserRole,
+  type UserRole,
 } from "./lib/authUtils";
-import {
-  getNewTokensWithRefreshToken,
-  getUserInfo,
-} from "./services/auth.services";
 
-async function refreshTokenMiddleware(refreshToken: string): Promise<boolean> {
+const BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
+
+type RefreshedTokens = {
+  accessToken: string;
+  refreshToken?: string;
+};
+
+function getTokenMaxAge(token: string): number {
+  const decoded = jwtUtils.decodedToken(token);
+
+  if (
+    !decoded ||
+    typeof decoded === "string" ||
+    typeof decoded.exp !== "number"
+  ) {
+    return 60 * 60 * 24;
+  }
+
+  return Math.max(0, decoded.exp - Math.floor(Date.now() / 1000));
+}
+
+function applyTokenCookies(
+  response: NextResponse,
+  tokens: RefreshedTokens | null,
+): NextResponse {
+  if (!tokens) {
+    return response;
+  }
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict" as const,
+    path: "/",
+  };
+
+  response.cookies.set("accessToken", tokens.accessToken, {
+    ...cookieOptions,
+    maxAge: getTokenMaxAge(tokens.accessToken),
+  });
+
+  if (tokens.refreshToken) {
+    response.cookies.set("refreshToken", tokens.refreshToken, {
+      ...cookieOptions,
+      maxAge: getTokenMaxAge(tokens.refreshToken),
+    });
+  }
+
+  return response;
+}
+
+function nextResponse(tokens: RefreshedTokens | null): NextResponse {
+  return applyTokenCookies(NextResponse.next(), tokens);
+}
+
+function redirectResponse(
+  url: URL,
+  tokens: RefreshedTokens | null,
+): NextResponse {
+  return applyTokenCookies(NextResponse.redirect(url), tokens);
+}
+
+async function refreshTokens(
+  refreshToken: string,
+): Promise<RefreshedTokens | null> {
+  if (!BASE_API_URL) {
+    console.error("NEXT_PUBLIC_API_BASE_URL is not defined");
+    return null;
+  }
+
   try {
-    const refresh = await getNewTokensWithRefreshToken(refreshToken);
-    return !!refresh;
-  } catch (error) {
-    console.error("Error refreshing token in middleware:", error);
-    return false;
+    const response = await fetch(`${BASE_API_URL}/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `refreshToken=${refreshToken}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      console.error("Token refresh failed:", response.status);
+      return null;
+    }
+
+    const result = await response.json();
+    const accessToken = result?.data?.accessToken;
+    const newRefreshToken = result?.data?.refreshToken;
+
+    if (typeof accessToken !== "string" || !accessToken) {
+      console.error("Refresh response did not contain an access token");
+      return null;
+    }
+
+    return {
+      accessToken,
+      ...(typeof newRefreshToken === "string" && newRefreshToken
+        ? { refreshToken: newRefreshToken }
+        : {}),
+    };
+  } catch (error: unknown) {
+    console.error("Error refreshing tokens:", error);
+    return null;
   }
 }
 
-export async function proxy(request: NextRequest) {
-  try {
-    const { pathname } = request.nextUrl;
-
-    const publicRoutes = ["/payment/success", "/payment/cancel"];
-    if (publicRoutes.some((route) => pathname.startsWith(route))) {
-      return NextResponse.next();
-    }
-
-    const accessToken = request.cookies.get("accessToken")?.value;
-    const refreshToken = request.cookies.get("refreshToken")?.value;
-
-    const verifiedToken = accessToken
-      ? jwtUtils.verifyToken(
-          accessToken,
-          process.env.JWT_ACCESS_SECRET as string,
-        )
-      : null;
-
-    const decodedAccessToken = verifiedToken?.data;
-    const isValidAccessToken = verifiedToken?.success;
-
-    let userRole: UserRole | null = null;
-    if (decodedAccessToken) {
-      userRole = decodedAccessToken.role as UserRole;
-    }
-
-    const routerOwner = getRouteOwner(pathname);
-    const isAuth = isAuthRoute(pathname);
-
-    if (
-      isValidAccessToken &&
-      refreshToken &&
-      (await isTokenExpiringSoon(accessToken as string))
-    ) {
-      const requestHeaders = new Headers(request.headers);
-      try {
-        const refreshed = await refreshTokenMiddleware(refreshToken);
-        if (refreshed) {
-          requestHeaders.set("x-token-refreshed", "1");
-        }
-      } catch (error) {
-        console.error("Token refresh failed:", error);
-      }
-    }
-
-    if (isAuth && isValidAccessToken && userRole) {
-      return NextResponse.redirect(
-        new URL(getDefaultDashboardRoute(userRole), request.url),
-      );
-    }
-
-    if (pathname === "/reset-password") {
-      const email = request.nextUrl.searchParams.get("email");
-      if (accessToken && email) {
-        const userInfo = await getUserInfo();
-        if (userInfo?.needPasswordChange) {
-          return NextResponse.next();
-        } else if (userRole) {
-          return NextResponse.redirect(
-            new URL(getDefaultDashboardRoute(userRole), request.url),
-          );
-        }
-      }
-      if (email) return NextResponse.next();
-
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    if (routerOwner === null) {
-      return NextResponse.next();
-    }
-
-    if (!accessToken || !isValidAccessToken) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    const userInfo = await getUserInfo();
-    if (userInfo) {
-      if (!userInfo.emailVerified) {
-        if (pathname !== "/verify-email") {
-          const verifyEmailUrl = new URL("/verify-email", request.url);
-          verifyEmailUrl.searchParams.set("email", userInfo.email);
-          return NextResponse.redirect(verifyEmailUrl);
-        }
-        return NextResponse.next();
-      }
-
-      if (userInfo.emailVerified && pathname === "/verify-email") {
-        return NextResponse.redirect(
-          new URL(getDefaultDashboardRoute(userRole as UserRole), request.url),
-        );
-      }
-
-      if (userInfo.needPasswordChange) {
-        if (pathname !== "/reset-password") {
-          const resetPasswordUrl = new URL("/reset-password", request.url);
-          resetPasswordUrl.searchParams.set("email", userInfo.email);
-          return NextResponse.redirect(resetPasswordUrl);
-        }
-        return NextResponse.next();
-      }
-    }
-
-    if (routerOwner === "COMMON") {
-      return NextResponse.next();
-    }
-
-    const serviceHubRoles: UserRole[] = [
-      "ADMIN",
-      "MANAGER",
-      "SERVICE_PROVIDER",
-      "CUSTOMER",
-      "JOB_CANDIDATE",
-    ];
-
-    if (serviceHubRoles.includes(routerOwner as UserRole)) {
-      const canAccess =
-        routerOwner === userRole ||
-        (userRole === "ADMIN" && routerOwner === "MANAGER");
-
-      if (!canAccess && userRole) {
-        return NextResponse.redirect(
-          new URL(getDefaultDashboardRoute(userRole), request.url),
-        );
-      }
-    }
-
-    return NextResponse.next();
-  } catch (error) {
-    console.error("Error in proxy middleware:", error);
-    return NextResponse.next();
+function getVerifiedRole(token: string): UserRole | null {
+  if (!JWT_ACCESS_SECRET) {
+    console.error("JWT_ACCESS_SECRET is not defined");
+    return null;
   }
+
+  const result = jwtUtils.verifyToken(token, JWT_ACCESS_SECRET);
+
+  if (!result.success || typeof result.data === "string") {
+    return null;
+  }
+
+  const { role, status } = result.data;
+
+  if (
+    (role !== "ADMIN" && role !== "STUDENT") ||
+    (status !== "ACTIVE" && status !== "BLOCKED")
+  ) {
+    return null;
+  }
+
+  if (status === "BLOCKED") {
+    return null;
+  }
+
+  return role;
+}
+
+export async function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+
+  let accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
+
+  let refreshedTokens: RefreshedTokens | null = null;
+
+  if (accessToken && refreshToken) {
+    try {
+      if (await isTokenExpiringSoon(accessToken)) {
+        refreshedTokens = await refreshTokens(refreshToken);
+
+        if (refreshedTokens) {
+          accessToken = refreshedTokens.accessToken;
+        }
+      }
+    } catch (error: unknown) {
+      console.error("Token refresh failed in proxy:", error);
+    }
+  }
+
+  const userRole = accessToken ? getVerifiedRole(accessToken) : null;
+
+  const isAuthenticated = userRole !== null;
+  const routeOwner = getRouteOwner(pathname);
+  const isAuth = isAuthRoute(pathname);
+
+  if (isAuth && isAuthenticated && userRole) {
+    return redirectResponse(
+      new URL(getDefaultDashboardRoute(userRole), request.url),
+      refreshedTokens,
+    );
+  }
+
+  if (routeOwner === null) {
+    return nextResponse(refreshedTokens);
+  }
+
+  if (!accessToken || !isAuthenticated || !userRole) {
+    const loginUrl = new URL("/login", request.url);
+
+    loginUrl.searchParams.set("redirect", `${pathname}${search}`);
+
+    return redirectResponse(loginUrl, refreshedTokens);
+  }
+
+  if (routeOwner === "COMMON") {
+    return nextResponse(refreshedTokens);
+  }
+
+  if (routeOwner !== userRole) {
+    return redirectResponse(
+      new URL(getDefaultDashboardRoute(userRole), request.url),
+      refreshedTokens,
+    );
+  }
+
+  return nextResponse(refreshedTokens);
 }
 
 export const config = {

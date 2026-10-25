@@ -16,10 +16,7 @@ import {
   LogInIcon,
   ShieldCheck,
   User,
-  Wrench,
   KeyRound,
-  ShieldUser,
-  UserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -68,41 +65,18 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
     toast.info(`Auto-filled credentials for testing.`);
   };
 
-  const handleGoogleLogin = () => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const frontendRedirect = encodeURIComponent(redirectPath || "/dashboard");
-    window.location.href = `${baseUrl}/auth/login/google?redirect=${frontendRedirect}`;
-  };
-
   const credentials = [
     {
       label: "Admin",
-      email: "admin@servicehub.com",
+      email: "admin@devsubmit.com",
       pass: "Admin123",
       icon: <ShieldCheck />,
     },
+
     {
-      label: "Manager",
-      email: "manager@servicehub.com",
-      pass: "Manager123",
-      icon: <ShieldUser />,
-    },
-    {
-      label: "Service Provider",
-      email: "sprovider@servicehub.com",
-      pass: "Provider123",
-      icon: <Wrench />,
-    },
-    {
-      label: "Job Candidate",
-      email: "jcandidate@servicehub.com",
-      pass: "Candidate123",
-      icon: <UserPlus />,
-    },
-    {
-      label: "Customer",
-      email: "customer@servicehub.com",
-      pass: "Customer123",
+      label: "Student",
+      email: "student@devsubmit.com",
+      pass: "Student123",
       icon: <User />,
     },
   ];
@@ -116,7 +90,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
               Sign In
             </CardTitle>
             <CardDescription className="text-sm font-medium">
-              Access the ServiceHub dashboard with your account.
+              Access the Dev Submit dashboard with your account.
             </CardDescription>
           </div>
 
@@ -196,31 +170,6 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
               )}
             </form.Subscribe>
           </form>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-slate-200 dark:border-slate-800" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase font-bold text-slate-400 tracking-widest">
-              <span className="bg-white dark:bg-slate-950 px-4">
-                Social Login
-              </span>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            type="button"
-            className="w-full h-12 font-bold border-2"
-            onClick={handleGoogleLogin}
-          >
-            <svg className="mr-2 h-5 w-5" viewBox="0 0 488 512">
-              <path
-                fill="currentColor"
-                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
-              />
-            </svg>
-            Continue with Google
-          </Button>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}

@@ -20,7 +20,7 @@ import AppField from "@/components/shared/form/AppField";
 import {
   IJobApplicationPayload,
   IUpdateJobApplicationPayload,
-} from "@/types/jobApplication.type";
+} from "@/types/submission.type";
 import {
   IUpdateJobApplicationFormValues,
   updateJobApplicationZodSchema,

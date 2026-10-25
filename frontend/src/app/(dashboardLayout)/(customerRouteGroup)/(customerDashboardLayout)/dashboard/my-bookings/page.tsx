@@ -1,4 +1,4 @@
-import MyAllSRsByCustomerTable from "@/components/modules/Dashboard/Customer/MySRequestsByCustomer/MyAllSRsByCustomerTable";
+import MyAllSRsByCustomerTable from "@/components/modules/Dashboard/Student/MySubmissions/MyAllSRsByCustomerTable";
 import { getMyAllServiceRequestByCustomerService } from "@/services/serviceRequest.services";
 
 import {

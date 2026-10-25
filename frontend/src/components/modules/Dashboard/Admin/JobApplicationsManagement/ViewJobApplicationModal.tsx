@@ -10,7 +10,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ApiResponse } from "@/types/api.types";
-import { IJobApplicationPayload } from "@/types/jobApplication.type";
+import { IJobApplicationPayload } from "@/types/submission.type";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Clock, DollarSign, MapPinHouse, Users } from "lucide-react";

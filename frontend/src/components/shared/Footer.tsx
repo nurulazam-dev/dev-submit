@@ -1,98 +1,87 @@
-import Link from "next/link";
-import {
-  Facebook,
-  Twitter,
-  Linkedin,
-  Github,
-  Mail,
-  Phone,
-  MapPin,
-} from "lucide-react";
 import Image from "next/image";
-// import logo from "/public/mna-serviceHub-logo.png";
+import Link from "next/link";
+import { ExternalLink, Mail } from "lucide-react";
 
 const footerLinks = {
-  company: [
-    { label: "About Us", href: "/about-us" },
-    { label: "Our Services", href: "/services" },
-    { label: "Careers", href: "/job-posts" },
-    { label: "Contact", href: "/contact-us" },
+  platform: [
+    { label: "Home", href: "/" },
+    { label: "Login", href: "/login" },
+    { label: "Register", href: "/register" },
   ],
-  support: [
-    { label: "Help Center", href: "/contact-us" },
-    { label: "Privacy Policy", href: "/privacy-policy" },
-    { label: "Terms of Service", href: "/terms-conditions" },
-    { label: "Refund Policy", href: "/refund-cancellation-policy" },
-  ],
-  social: [
-    {
-      icon: Facebook,
-      href: "https://www.facebook.com/nurulazam.dev",
-      label: "Facebook",
-    },
-    { icon: Twitter, href: "https://x.com/nurulazam_dev", label: "Twitter" },
-    {
-      icon: Linkedin,
-      href: "linkedin.com/in/nurulazam-dev",
-      label: "LinkedIn",
-    },
-    { icon: Github, href: "https://github.com/nurulazam-dev", label: "GitHub" },
+  account: [
+    { label: "Admin Dashboard", href: "/admin/dashboard" },
+    { label: "Student Dashboard", href: "/dashboard" },
   ],
 };
 
+const socialLinks = [
+  {
+    label: "GitHub",
+    href: "https://github.com/nurulazam-dev",
+    icon: ExternalLink,
+  },
+  {
+    label: "LinkedIn",
+    href: "https://linkedin.com/in/nurulazam-dev",
+    icon: ExternalLink,
+  },
+];
+
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = 2026;
 
   return (
-    <footer className="border-t pt-10 pb-6 transition-colors">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+    <footer className="border-t border-border bg-background">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Brand */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex items-center justify-center">
-                <Image
-                  // src={logo.src}
-                  src="/mna-serviceHub-logo.png"
-                  height={40}
-                  width={40}
-                  alt="MNA ServiceHub"
-                  preload
-                  className="h-10 w-auto object-contain"
-                />
-              </div>
+            <Link href="/" className="inline-flex items-center gap-3">
+              <Image
+                src="/dev-submit-logo.png"
+                width={40}
+                height={40}
+                alt="Dev Submit logo"
+                className="h-10 w-10 object-contain"
+              />
               <span className="text-xl font-bold tracking-tight">
-                MNA ServiceHub
+                Dev Submit
               </span>
             </Link>
-            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              MNA ServiceHub acts as a centralized digital platform that enables
-              all local service-related activities to be managed efficiently
-              from a single place.
+
+            <p className="max-w-xs text-sm leading-6 text-muted-foreground">
+              A project submission platform where students submit their work and
+              administrators review submissions and provide feedback.
             </p>
-            <div className="flex gap-4">
-              {footerLinks.social.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
+
+            <div className="flex items-center gap-4">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
                   className="text-muted-foreground transition-colors hover:text-primary"
-                  aria-label={item.label}
                 >
-                  <item.icon size={20} />
-                </Link>
+                  <Icon size={19} />
+                </a>
               ))}
             </div>
           </div>
 
+          {/* Platform */}
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
-              Company
+              Platform
             </h3>
-            <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
+
+            <ul className="space-y-3">
+              {footerLinks.platform.map((link) => (
+                <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary hover:underline underline-offset-4"
+                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
                     {link.label}
                   </Link>
@@ -101,16 +90,18 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Dashboards */}
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
-              Support
+              Dashboards
             </h3>
-            <ul className="space-y-2">
-              {footerLinks.support.map((link) => (
-                <li key={link.label}>
+
+            <ul className="space-y-3">
+              {footerLinks.account.map((link) => (
+                <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary hover:underline underline-offset-4"
+                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
                     {link.label}
                   </Link>
@@ -119,42 +110,37 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Contact */}
           <div className="space-y-4">
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
-              Contact Us
+            <h3 className="text-sm font-semibold uppercase tracking-wider">
+              Contact
             </h3>
-            <div className="flex items-start gap-3 text-sm text-muted-foreground">
-              <MapPin size={18} className="mt-0.5 shrink-0 text-primary" />
-              <span> Raozan, Chattogram, Bangladesh</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Phone size={18} className="shrink-0 text-primary" />
-              <span>+880 1234-567890</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Mail size={18} className="shrink-0 text-primary" />
-              <span>admin@mnaservicehub.com</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Mail size={18} className="shrink-0 text-primary" />
-              <span>support@mnaservicehub.com</span>
-            </div>
+
+            <p className="text-sm leading-6 text-muted-foreground">
+              Have a question or need help with the platform?
+            </p>
+
+            <a
+              href="https://github.com/nurulazam-dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+            >
+              <Mail size={17} />
+              <span>Contact via GitHub</span>
+            </a>
           </div>
         </div>
 
-        <div className="mt-10 border-t pt-6">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+        <div className="mt-10 border-t border-border pt-6">
+          <div className="flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
             <p className="text-xs text-muted-foreground">
-              © {currentYear} MNA ServiceHub. All rights reserved.
+              © {currentYear} Dev Submit. All rights reserved.
             </p>
-            <div className="flex gap-6 text-xs text-muted-foreground">
-              <Link href="/privacy-policy" className="hover:text-primary">
-                Privacy Policy
-              </Link>
-              <Link href="/terms-conditions" className="hover:text-primary">
-                Terms of Use
-              </Link>
-            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Built for students and developers.
+            </p>
           </div>
         </div>
       </div>

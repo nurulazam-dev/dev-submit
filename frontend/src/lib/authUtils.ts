@@ -1,21 +1,15 @@
-export type UserRole =
-  | "ADMIN"
-  | "MANAGER"
-  | "SERVICE_PROVIDER"
-  | "CUSTOMER"
-  | "JOB_CANDIDATE";
+export type UserRole = "ADMIN" | "STUDENT";
 
 export const authRoutes = [
   "/login",
   "/register",
-  "/register-customer",
   "/forgot-password",
   "/reset-password",
   "/verify-email",
 ];
 
-export const isAuthRoute = (pathname: string) => {
-  return authRoutes.some((route: string) => route === pathname);
+export const isAuthRoute = (pathname: string): boolean => {
+  return authRoutes.some((route) => route === pathname);
 };
 
 export type RouteConfig = {
@@ -29,35 +23,24 @@ export const commonProtectedRoutes: RouteConfig = {
 };
 
 export const adminProtectedRoutes: RouteConfig = {
-  pattern: [/^\/admin/],
   exact: [],
+  pattern: [/^\/admin(?:\/|$)/],
 };
 
-export const managerProtectedRoutes: RouteConfig = {
-  pattern: [/^\/manager/],
+export const studentProtectedRoutes: RouteConfig = {
   exact: [],
+  pattern: [/^\/dashboard(?:\/|$)/],
 };
 
-export const providerProtectedRoutes: RouteConfig = {
-  pattern: [/^\/service-provider/],
-  exact: [],
-};
-
-export const candidateProtectedRoutes: RouteConfig = {
-  pattern: [/^\/candidate/],
-  exact: [],
-};
-
-export const customerProtectedRoutes: RouteConfig = {
-  pattern: [/^\/dashboard/, /^\/payment/],
-  exact: ["/payment/success", "/payment/cancel"],
-};
-
-export const isRouteMatches = (pathname: string, routes: RouteConfig) => {
+export const isRouteMatches = (
+  pathname: string,
+  routes: RouteConfig,
+): boolean => {
   if (routes.exact.includes(pathname)) {
     return true;
   }
-  return routes.pattern.some((pattern: RegExp) => pattern.test(pathname));
+
+  return routes.pattern.some((pattern) => pattern.test(pathname));
 };
 
 export const getRouteOwner = (pathname: string): UserRole | "COMMON" | null => {
@@ -65,20 +48,8 @@ export const getRouteOwner = (pathname: string): UserRole | "COMMON" | null => {
     return "ADMIN";
   }
 
-  if (isRouteMatches(pathname, managerProtectedRoutes)) {
-    return "MANAGER";
-  }
-
-  if (isRouteMatches(pathname, providerProtectedRoutes)) {
-    return "SERVICE_PROVIDER";
-  }
-
-  if (isRouteMatches(pathname, candidateProtectedRoutes)) {
-    return "JOB_CANDIDATE";
-  }
-
-  if (isRouteMatches(pathname, customerProtectedRoutes)) {
-    return "CUSTOMER";
+  if (isRouteMatches(pathname, studentProtectedRoutes)) {
+    return "STUDENT";
   }
 
   if (isRouteMatches(pathname, commonProtectedRoutes)) {
@@ -88,18 +59,14 @@ export const getRouteOwner = (pathname: string): UserRole | "COMMON" | null => {
   return null;
 };
 
-export const getDefaultDashboardRoute = (role: UserRole) => {
+export const getDefaultDashboardRoute = (role: UserRole): string => {
   switch (role) {
     case "ADMIN":
       return "/admin/dashboard";
-    case "MANAGER":
-      return "/manager/dashboard";
-    case "SERVICE_PROVIDER":
-      return "/service-provider/dashboard";
-    case "JOB_CANDIDATE":
-      return "/candidate/dashboard";
-    case "CUSTOMER":
+
+    case "STUDENT":
       return "/dashboard";
+
     default:
       return "/";
   }
@@ -108,20 +75,20 @@ export const getDefaultDashboardRoute = (role: UserRole) => {
 export const isValidRedirectForRole = (
   redirectPath: string,
   role: UserRole,
-) => {
+): boolean => {
+  if (
+    !redirectPath.startsWith("/") ||
+    redirectPath.startsWith("//") ||
+    redirectPath.includes("\\")
+  ) {
+    return false;
+  }
+
   const routeOwner = getRouteOwner(redirectPath);
 
   if (routeOwner === null || routeOwner === "COMMON") {
     return true;
   }
 
-  if (routeOwner === role) {
-    return true;
-  }
-
-  if (role === "ADMIN" && routeOwner === "MANAGER") {
-    return true;
-  }
-
-  return false;
+  return routeOwner === role;
 };

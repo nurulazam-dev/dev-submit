@@ -1,4 +1,4 @@
-import { IServiceRequestPayload } from "./serviceRequest.type";
+export type TSubmissionStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface NavItem {
   title: string;
@@ -11,49 +11,49 @@ export interface NavSection {
   items: NavItem[];
 }
 
+export interface IStatusDistribution {
+  status: TSubmissionStatus;
+  count: number;
+}
+
+export interface IMonthlyStats {
+  month: string;
+  count: number;
+}
+
 export interface PieChartData {
-  status: string;
+  status: TSubmissionStatus;
   count: number;
 }
 
 export interface BarChartData {
-  month: Date | string;
+  month: string;
   count: number;
 }
 
-/* export interface IDashboardStatsDataPayload {
-  requestCount: number;
-  providerCount: number;
-  serviceCount: number;
-  pendingApplications: number;
+export interface IAdminDashboardStats {
   userCount: number;
-  totalRevenue: number;
-  barChartData: BarChartData[];
-  pieChartData: PieChartData[];
-} */
+  adminCount: number;
+  studentCount: number;
 
-export interface IDashboardStatsDataPayload {
-  userCount?: number;
-  providerCount?: number;
-  requestCount?: number;
-  serviceCount?: number;
-  pendingApplications?: number;
-  totalRevenue?: number | { _sum: { amount: number | null } };
+  submissionCount: number;
+  pendingSubmissions: number;
+  approvedSubmissions: number;
+  rejectedSubmissions: number;
 
-  totalAssignedRequests?: number;
-  completedRequests?: number;
-  reviewCount?: number;
-  averageRating?: number;
+  reviewCount: number;
 
-  totalJobApplied?: number;
-  acceptedApplications?: number;
-  rejectedApplications?: number;
-
-  serviceRequest?: IServiceRequestPayload[];
-  totalRequests?: number;
-  activeRequests?: number;
-  totalSpent?: number;
-
-  requestStatusDistribution?: { status: string; count: number }[];
-  monthlyRequests?: { month: string; count: number }[];
+  requestStatusDistribution: IStatusDistribution[];
+  monthlyRequests: IMonthlyStats[];
 }
+
+export interface IStudentDashboardStats {
+  totalSubmissions: number;
+  myPendingSubmissions: number;
+  myApprovedSubmissions: number;
+  myRejectedSubmissions: number;
+}
+
+export type IDashboardStatsDataPayload =
+  | IAdminDashboardStats
+  | IStudentDashboardStats;

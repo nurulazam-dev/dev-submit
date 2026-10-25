@@ -6,24 +6,26 @@ export const setCookie = async (
   name: string,
   value: string,
   maxAgeInSeconds: number,
-) => {
+): Promise<void> => {
   const cookieStore = await cookies();
 
   cookieStore.set(name, value, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
-    maxAge: maxAgeInSeconds,
+    maxAge: Math.max(0, Math.floor(maxAgeInSeconds)),
   });
 };
 
-export const getCookie = async (name: string) => {
+export const getCookie = async (name: string): Promise<string | undefined> => {
   const cookieStore = await cookies();
+
   return cookieStore.get(name)?.value;
 };
 
-export const deleteCookie = async (name: string) => {
+export const deleteCookie = async (name: string): Promise<void> => {
   const cookieStore = await cookies();
+
   cookieStore.delete(name);
 };

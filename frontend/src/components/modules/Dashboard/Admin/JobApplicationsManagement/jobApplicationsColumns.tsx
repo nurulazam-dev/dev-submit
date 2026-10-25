@@ -1,6 +1,6 @@
 import DateCell from "@/components/shared/cell/DateCell";
 import { Badge } from "@/components/ui/badge";
-import { IJobApplicationPayload } from "@/types/jobApplication.type";
+import { IJobApplicationPayload } from "@/types/submission.type";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   ExternalLink,

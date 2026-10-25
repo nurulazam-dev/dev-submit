@@ -1,18 +1,11 @@
-import { IServiceProviderPayload } from "./serviceProvider.type";
-import { IServiceRequestPayload } from "./serviceRequest.type";
-import { IUserPayload } from "./users.type";
+export type ReviewStatus = "IN_PROGRESS" | "COMPLETED";
 
 export interface IReviewPayload {
-  id: string;
-  requestId: string;
-  serviceRequest?: IServiceRequestPayload;
-  serviceId: string;
-  service?: any; // Service মডেলের টাইপ
-  providerId: string;
-  serviceProvider?: IServiceProviderPayload;
-  customerId: string;
-  customer?: IUserPayload;
-  rating: number;
-  comment: string;
-  createdAt: Date | string;
+  submissionId: string;
+  feedback: string;
+  status: ReviewStatus;
+}
+
+export interface IReviewStatusUpdatePayload {
+  status: ReviewStatus;
 }

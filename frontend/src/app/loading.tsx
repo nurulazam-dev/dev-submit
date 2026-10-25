@@ -1,25 +1,8 @@
 "use client";
 
-// import { useEffect, useState, useTransition } from "react";
-// import { usePathname, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 export default function GlobalLoader() {
-  // const pathname = usePathname();
-  // const searchParams = useSearchParams();
-  // const [isPending, startTransition] = useTransition();
-  // const [isLoading, setIsLoading] = useState(false);
-
-  // useEffect(() => {
-  //   startTransition(() => {
-  //     setIsLoading(false);
-  //   });
-
-  //   return () => setIsLoading(true);
-  // }, [pathname, searchParams]);
-
-  // if (!isLoading && !isPending) return null;
-
   return (
     <>
       <div className="fixed top-0 left-0 z-9999 h-1 w-full overflow-hidden bg-muted">

@@ -5,6 +5,11 @@ export interface ApiResponse<TData = unknown> {
   meta?: PaginationMeta;
 }
 
+export interface ApiErrorResponse {
+  success: false;
+  message: string;
+}
+
 export interface PaginationMeta {
   page: number;
   limit: number;
@@ -12,7 +17,7 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
-export interface ApiErrorResponse {
-  success: boolean;
+export interface ApiSuccessResponse {
+  success: true;
   message: string;
 }

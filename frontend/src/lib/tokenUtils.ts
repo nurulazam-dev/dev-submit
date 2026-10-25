@@ -1,22 +1,28 @@
 "use server";
 
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { setCookie } from "./cookieUtils";
 
 const getTokenSecondsRemaining = (token: string): number => {
-  if (!token) return 0;
-  try {
-    const tokenPayload = jwt.decode(token) as JwtPayload;
+  if (!token) {
+    return 0;
+  }
 
-    if (tokenPayload && !tokenPayload.exp) {
+  try {
+    const decoded = jwt.decode(token);
+
+    if (
+      !decoded ||
+      typeof decoded === "string" ||
+      typeof decoded.exp !== "number"
+    ) {
       return 0;
     }
 
-    const remainingSeconds =
-      (tokenPayload.exp as number) - Math.floor(Date.now() / 1000);
+    const remainingSeconds = decoded.exp - Math.floor(Date.now() / 1000);
 
-    return remainingSeconds > 0 ? remainingSeconds : 0;
-  } catch (error) {
+    return Math.max(0, remainingSeconds);
+  } catch (error: unknown) {
     console.error("Error decoding token:", error);
     return 0;
   }
@@ -25,15 +31,15 @@ const getTokenSecondsRemaining = (token: string): number => {
 export const setTokenInCookies = async (
   name: string,
   token: string,
-  fallbackMaxAgeInSeconds = 60 * 60 * 24, // 1 days
-) => {
-  let maxAgeInSeconds;
+  fallbackMaxAgeInSeconds = 60 * 60 * 24,
+): Promise<void> => {
+  const remainingSeconds = getTokenSecondsRemaining(token);
 
-  if (name !== "better-auth.session_token") {
-    maxAgeInSeconds = getTokenSecondsRemaining(token);
-  }
-
-  await setCookie(name, token, maxAgeInSeconds || fallbackMaxAgeInSeconds);
+  await setCookie(
+    name,
+    token,
+    remainingSeconds > 0 ? remainingSeconds : fallbackMaxAgeInSeconds,
+  );
 };
 
 export async function isTokenExpiringSoon(
@@ -41,10 +47,10 @@ export async function isTokenExpiringSoon(
   thresholdInSeconds = 300,
 ): Promise<boolean> {
   const remainingSeconds = getTokenSecondsRemaining(token);
+
   return remainingSeconds > 0 && remainingSeconds <= thresholdInSeconds;
 }
 
 export async function isTokenExpired(token: string): Promise<boolean> {
-  const remainingSeconds = getTokenSecondsRemaining(token);
-  return remainingSeconds === 0;
+  return getTokenSecondsRemaining(token) === 0;
 }

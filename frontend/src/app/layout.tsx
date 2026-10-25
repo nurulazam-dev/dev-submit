@@ -12,9 +12,8 @@ const space_Grotesk_init = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "MNA ServiceHub",
-  description:
-    "MNA ServiceHub acts as a centralized digital platform that enables all local service-related activities to be managed efficiently from a single place.",
+  title: "Dev Submit",
+  description: "Dev Submit....",
 };
 
 export default function RootLayout({
@@ -37,7 +36,6 @@ export default function RootLayout({
           <QueryProvider>
             {children}
             <Toaster position="top-center" richColors />
-            <AIChatBotAssistant />
           </QueryProvider>
         </ThemeProvider>
       </body>

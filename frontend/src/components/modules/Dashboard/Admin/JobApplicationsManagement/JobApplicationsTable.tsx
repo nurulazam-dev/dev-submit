@@ -16,7 +16,7 @@ import { useServerManagedDataTable } from "@/hooks/useServerManagedDataTable";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { IJobApplicationPayload } from "@/types/jobApplication.type";
+import { IJobApplicationPayload } from "@/types/submission.type";
 import { getAllJobApplicationsService } from "@/services/jobApplications.services";
 import UpdateJobApplicationModal from "./UpdateJobApplicationModal";
 import ViewJobApplicationModal from "./ViewJobApplicationModal";
