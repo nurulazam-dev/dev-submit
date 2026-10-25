@@ -17,8 +17,6 @@ interface EnvConfig {
 
 const loadEnvVariables = (): EnvConfig => {
   const requireEnvVariable = [
-    "NODE_ENV",
-    "PORT",
     "DATABASE_URL",
     "ACCESS_TOKEN_SECRET",
     "REFRESH_TOKEN_SECRET",
@@ -38,8 +36,8 @@ const loadEnvVariables = (): EnvConfig => {
   });
 
   return {
-    NODE_ENV: process.env.NODE_ENV as string,
-    PORT: process.env.PORT as string,
+    NODE_ENV: process.env.NODE_ENV || "development",
+    PORT: process.env.PORT || "5000",
     DATABASE_URL: process.env.DATABASE_URL as string,
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET as string,
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,

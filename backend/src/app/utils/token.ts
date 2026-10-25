@@ -3,7 +3,7 @@ import { SignOptions } from "jsonwebtoken";
 import { envVars } from "../config/env";
 import { CookieUtils } from "./cookie";
 import { jwtUtils } from "./jwt";
-import { TAuthPayload } from "@/app/interfaces/requestUser.interface";
+import { TAuthPayload } from "../interfaces/requestUser.interface";
 
 const isProd = envVars.NODE_ENV === "production";
 

@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import { checkAuth } from "../../middleware/checkAuth";
-import { validateRequest } from "../../middleware/validateRequest.ts";
+import { validateRequest } from "../../middleware/validateRequest";
 import { AuthValidation } from "./auth.validation";
-import { RateLimiter } from "@/app/middleware/rateLimiter";
+import { RateLimiter } from "../../middleware/rateLimiter";
 
 const router = Router();
 

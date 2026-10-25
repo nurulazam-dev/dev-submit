@@ -1,6 +1,6 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
-import { db } from "prisma/db";
+import { db } from "../../../../prisma/db";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import {
   IQueryCollection,

@@ -4,7 +4,7 @@ import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
 import { CookieUtils } from "../utils/cookie";
 import { jwtUtils } from "../utils/jwt";
-import { db } from "prisma/db";
+import { db } from "../../../prisma/db";
 import { passwordUtils } from "../utils/password";
 
 export const checkAuth =
@@ -76,6 +76,7 @@ export const checkAuth =
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
         status: user.status,
       };
 

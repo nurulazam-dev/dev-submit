@@ -19,13 +19,13 @@ npm run dev
 ### Build project:
 
 ```bash
-
+npm run build
 ```
 
-### deploy project:
+### Start project:
 
 ```bash
-
+npm start
 ```
 
 ### Run the project after create or add new schema:

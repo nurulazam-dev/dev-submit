@@ -39,9 +39,18 @@ const verifyOtp = (otp: string, storedHash: string) => {
   return a.length === b.length && timingSafeEqual(a, b);
 };
 
-const isTokenStale = (iat: number | undefined, changedAt?: Date | null) => {
+import { Temporal } from "temporal-polyfill";
+
+const isTokenStale = (
+  iat: number | undefined,
+  changedAt?: Temporal.Instant | Date | null,
+) => {
   if (!changedAt) return false;
-  return (iat ?? 0) < Math.floor(changedAt.getTime() / 1000);
+  const changedTimestampSeconds =
+    changedAt instanceof Date
+      ? Math.floor(changedAt.getTime() / 1000)
+      : Math.floor(changedAt.epochMilliseconds / 1000);
+  return (iat ?? 0) < changedTimestampSeconds;
 };
 
 export const passwordUtils = {

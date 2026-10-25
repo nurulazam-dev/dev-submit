@@ -3,10 +3,11 @@ import status from "http-status";
 import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import { jwtUtils } from "../../utils/jwt";
-import { db } from "prisma/db";
-import { TAuthPayload } from "@/app/interfaces/requestUser.interface";
+import { db } from "../../../../prisma/db";
+import { TAuthPayload } from "../../interfaces/requestUser.interface";
 import { passwordUtils } from "../../utils/password";
 import { tokenUtils } from "../../utils/token";
+import { Temporal } from "temporal-polyfill";
 import {
   IChangePasswordPayload,
   ILoginUserPayload,
@@ -140,7 +141,9 @@ const forgetPassword = async (rawEmail: string) => {
 
   await db.orm.public.User.where({ id: user.id }).update({
     resetOtpHash: passwordUtils.hashOtp(otp),
-    resetOtpExpiresAt: new Date(Date.now() + OTP_EXPIRES_IN_MS),
+    resetOtpExpiresAt: Temporal.Instant.fromEpochMilliseconds(
+      Date.now() + OTP_EXPIRES_IN_MS,
+    ),
   });
 
   // TODO: email service দিয়ে OTP পাঠাতে হবে
@@ -168,7 +171,7 @@ const resetPassword = async (
     throw invalid;
   }
 
-  if (new Date(user.resetOtpExpiresAt).getTime() < Date.now()) {
+  if (user.resetOtpExpiresAt.epochMilliseconds < Date.now()) {
     throw invalid;
   }
 
@@ -178,7 +181,7 @@ const resetPassword = async (
 
   await db.orm.public.User.where({ id: user.id }).update({
     password: await passwordUtils.hashPassword(newPassword),
-    passwordChangedAt: new Date(),
+    passwordChangedAt: Temporal.Now.instant(),
     resetOtpHash: null,
     resetOtpExpiresAt: null,
   });
@@ -214,7 +217,7 @@ const changePassword = async (
 
   const updated = await db.orm.public.User.where({ id: user.id }).update({
     password: await passwordUtils.hashPassword(newPassword),
-    passwordChangedAt: new Date(),
+    passwordChangedAt: Temporal.Now.instant(),
   });
 
   // return issueTokens(updated);

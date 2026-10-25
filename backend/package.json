@@ -2,12 +2,12 @@
   "name": "dev-submit_backend",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.ts",
+  "main": "dist/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "contract:emit": "prisma contract emit",
     "start": "node dist/server.js",
-    "build": "tsc",
+    "build": "prisma contract emit && tsc --noEmit && tsup",
     "dev": "tsx --watch src/server.ts"
   },
   "keywords": [],
@@ -43,6 +43,7 @@
     "@types/qs": "^6.15.1",
     "@types/uuid": "^10.0.0",
     "prisma": "^8.0.0-rc.23",
+    "tsup": "^9.0.0",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   }

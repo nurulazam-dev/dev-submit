@@ -6,7 +6,7 @@ import status from "http-status";
 import { tokenUtils } from "../../utils/token";
 import AppError from "../../errorHelpers/AppError";
 import { CookieUtils } from "../../utils/cookie";
-import { TAuthPayload } from "@/app/interfaces/requestUser.interface";
+import { TAuthPayload } from "../../interfaces/requestUser.interface";
 
 const registerStudent = catchAsync(async (req: Request, res: Response) => {
   const { user, accessToken, refreshToken } = await AuthService.registerStudent(

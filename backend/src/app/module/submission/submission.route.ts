@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { SubmissionController } from "./submission.controller";
 import { checkAuth } from "../../middleware/checkAuth";
-import { RateLimiter } from "@/app/middleware/rateLimiter";
-import { validateRequest } from "@/app/middleware/validateRequest.ts";
+import { RateLimiter } from "../../middleware/rateLimiter";
+import { validateRequest } from "../../middleware/validateRequest";
 import { SubmissionValidation } from "./submission.validation";
 
 const router = Router();

@@ -6,7 +6,7 @@ import type {
   IStatusDistribution,
   IMonthlyStats,
 } from "./stats.interface";
-import { db } from "prisma/db";
+import { db } from "../../../../prisma/db";
 
 const countRecords = async (collection: any): Promise<number> => {
   const result = await collection.aggregate((agg: any) => ({
