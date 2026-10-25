@@ -87,10 +87,7 @@ const getAllSubmissions = async (query: IQueryParams) => {
     )
       .search()
       .filter()
-      // .include({
-      //   reviews: true,
-      // })
-      .dynamicInclude(submissionIncludeConfig)
+      .dynamicInclude(submissionIncludeConfig, ["review", "student"])
       .paginate()
       .sort()
       .fields()
@@ -115,10 +112,7 @@ const getMySubmissions = async (query: IQueryParams, studentId: string) => {
         studentId,
       })
       .filter()
-      // .include({
-      //   reviews: true,
-      // })
-      .dynamicInclude(submissionIncludeConfig)
+      .dynamicInclude(submissionIncludeConfig, ["review"])
       .paginate()
       .sort()
       .fields()
@@ -127,9 +121,10 @@ const getMySubmissions = async (query: IQueryParams, studentId: string) => {
 };
 
 const getSubmissionById = async (id: string) => {
-  const result = await db.orm.public.Submission.first({
-    id,
-  });
+  const result = await db.orm.public.Submission.where({ id })
+    .include("review")
+    .include("student")
+    .first();
 
   if (!result) {
     throw new AppError(status.NOT_FOUND, "Submission not found!");

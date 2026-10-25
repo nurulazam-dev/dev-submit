@@ -1,38 +1,21 @@
+"use server";
+
 import { getActionErrorMessage } from "@/lib/getActionErrorMessage";
 import {
-  adminDeleteUserService,
   adminUpdateUser,
-  createStaff,
   getUserById,
+  updateUserProfile,
 } from "@/services/users.services";
 import { ApiErrorResponse, ApiResponse } from "@/types/api.types";
-import { IAdminUpdateUserPayload, IUserPayload } from "@/types/users.type";
+import {
+  IAdminUpdateUserPayload,
+  IUpdateUserPayload,
+  IUserPayload,
+} from "@/types/users.type";
 import {
   adminUpdateUserZodSchema,
-  registerStaffZodSchema,
+  updateUserProfileZodSchema,
 } from "@/zod/user.validation";
-
-export const createStaffAction = async (
-  payload: IUserPayload,
-): Promise<ApiResponse<IUserPayload> | ApiErrorResponse> => {
-  const parsedPayload = registerStaffZodSchema.safeParse(payload);
-
-  if (!parsedPayload.success) {
-    return {
-      success: false,
-      message: parsedPayload.error.issues[0]?.message || "Invalid input",
-    };
-  }
-
-  try {
-    return await createStaff(parsedPayload.data as IUserPayload);
-  } catch (error: unknown) {
-    return {
-      success: false,
-      message: getActionErrorMessage(error, "Failed to create staff member"),
-    };
-  }
-};
 
 export const getUserByIdAction = async (
   id: string,
@@ -45,7 +28,7 @@ export const getUserByIdAction = async (
   }
 
   try {
-    return await getUserById(id);
+    return (await getUserById(id)) as ApiResponse<IUserPayload>;
   } catch (error: unknown) {
     return {
       success: false,
@@ -54,46 +37,48 @@ export const getUserByIdAction = async (
   }
 };
 
-export const adminUpdateUserAction = async (
+export const updateUserAction = async (
   id: string,
-  payload: IAdminUpdateUserPayload,
+  payload: IUpdateUserPayload,
 ): Promise<ApiResponse<IUserPayload> | ApiErrorResponse> => {
-  const parsedPayload = adminUpdateUserZodSchema.safeParse(payload);
+  const parsed = updateUserProfileZodSchema.safeParse(payload);
 
-  if (!parsedPayload.success) {
+  if (!parsed.success) {
     return {
       success: false,
-      message: parsedPayload.error.issues[0]?.message || "Invalid input",
+      message: parsed.error.issues[0]?.message || "Invalid input",
     };
   }
 
   try {
-    return await adminUpdateUser(id, parsedPayload.data);
+    return (await updateUserProfile(id, parsed.data)) as ApiResponse<IUserPayload>;
   } catch (error: unknown) {
     return {
       success: false,
-      message: getActionErrorMessage(error, "Failed to update user"),
+      message: getActionErrorMessage(error, "Failed to update profile"),
     };
   }
 };
 
-export const adminDeleteUserAction = async (
+export const adminUpdateUserAction = async (
   id: string,
-): Promise<ApiResponse<{ message: string }> | ApiErrorResponse> => {
-  if (!id) {
+  payload: IAdminUpdateUserPayload,
+): Promise<ApiResponse<IUserPayload> | ApiErrorResponse> => {
+  const parsed = adminUpdateUserZodSchema.safeParse(payload);
+
+  if (!parsed.success) {
     return {
       success: false,
-      message: "Invalid user id",
+      message: parsed.error.issues[0]?.message || "Invalid input",
     };
   }
 
   try {
-    const result = await adminDeleteUserService(id);
-    return result;
+    return (await adminUpdateUser(id, parsed.data)) as ApiResponse<IUserPayload>;
   } catch (error: unknown) {
     return {
       success: false,
-      message: getActionErrorMessage(error, "Failed to delete user"),
+      message: getActionErrorMessage(error, "Failed to update user"),
     };
   }
 };

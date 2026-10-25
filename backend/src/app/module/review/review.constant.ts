@@ -10,4 +10,5 @@ export const reviewSortableFields = ["createdAt"];
 
 export const reviewIncludeConfig = {
   submission: true,
+  reviewer: true,
 } as const;

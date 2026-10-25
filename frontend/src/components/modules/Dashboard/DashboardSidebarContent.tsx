@@ -26,7 +26,7 @@ const DashboardSidebarContent = ({
       {/* Logo / Brand */}
       <div className="flex h-16 items-center border-b px-6">
         <Link href={dashboardHome}>
-          <span className="text-xl font-bold text-primary">MNA ServiceHub</span>
+          <span className="text-xl font-bold text-primary">MNA DevSubmit</span>
         </Link>
       </div>
 

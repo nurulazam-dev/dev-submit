@@ -1,28 +1,32 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useState } from "react";
-import { Zap, MapPin, Phone, MessageSquare, ChevronRight } from "lucide-react";
+import {
+  Zap,
+  GitBranch,
+  ExternalLink,
+  FileText,
+  ChevronRight,
+} from "lucide-react";
 
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import AppField from "@/components/shared/form/AppField";
 import CustomSubmitButton from "@/components/shared/form/CustomSubmitButton";
-import {
-  submissionZodSchema,
-  ISubmissionPayload,
-} from "@/zod/submission.validation";
-import { applySubmissionAction } from "@/actions/submission.action";
-import { ISubmissionPayload } from "@/types/submission.type";
-import { Button } from "@/components/ui/button";
+
+import { createSubmissionAction } from "@/actions/submission.action";
+import type { ISubmissionPayload } from "@/types/submission.type";
+import { createSubmissionZodSchema } from "@/zod/submission.validation";
 
 interface ApplySubmissionModalProps {
   studentId: string;
@@ -34,133 +38,211 @@ export default function ApplySubmissionModal({
   submission,
 }: ApplySubmissionModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: (payload: ISubmissionPayload) => applySubmissionAction(payload),
+    mutationFn: createSubmissionAction,
 
-    onSuccess: (res) => {
-      if (res.success) {
-        toast.success("Submission submitted successfully!");
-        setIsOpen(false);
-      } else {
-        toast.error(res.message);
+    onSuccess: async (res) => {
+      if (!res.success) {
+        toast.error(res.message || "Failed to submit your application.");
+        return;
       }
+
+      toast.success("Submission submitted successfully!");
+
+      await queryClient.invalidateQueries({
+        queryKey: ["my-submissions"],
+      });
+
+      setIsOpen(false);
+    },
+
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.",
+      );
     },
   });
 
   const form = useForm({
     defaultValues: {
-      studentId: studentId,
+      studentId,
+      title: "",
       description: "",
       githubUrl: "",
       liveUrl: "",
     },
+
+    // validators: {
+    //   onSubmit: createSubmissionZodSchema,
+    // },
 
     onSubmit: async ({ value }) => {
       await mutateAsync(value);
     },
   });
 
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      setIsOpen(nextOpen);
+      if (!nextOpen) form.reset();
+    },
+    [form],
+  );
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button className="w-full h-12 rounded-md font-black text-lg transition-all hover:-translate-y-1 group">
+          <Button className="group h-12 w-full rounded-md text-lg font-black transition-all hover:-translate-y-1">
             Apply for Submission
             <ChevronRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-112.5 rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
-        <DialogHeader className="bg-primary p-8 text-primary-foreground relative">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
+
+      <DialogContent className="overflow-hidden rounded-2xl border-none p-0 shadow-2xl sm:max-w-xl">
+        <DialogHeader className="relative bg-primary p-8 text-primary-foreground">
+          <div className="absolute right-0 top-0 p-4 opacity-10">
             <Zap className="size-24" />
           </div>
+
           <DialogTitle className="text-2xl font-black">
-            Book Service
+            Apply for Submission
           </DialogTitle>
-          <DialogDescription className="text-primary-foreground/80 font-medium">
-            You are requesting for:{" "}
-            <span className="text-white underline">{service?.name}</span>
+
+          <DialogDescription className="font-medium text-primary-foreground/80">
+            Submit your work for{" "}
+            <span className="font-bold text-white">{submission.title}</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-8">
+        <div className="p-6 sm:p-8">
           <form
             noValidate
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
               form.handleSubmit();
             }}
             className="space-y-5"
           >
             <form.Field
-              name="serviceAddress"
+              name="title"
               validators={{
-                onChange: serviceRequestZodSchema.shape.serviceAddress,
+                onChange: ({ value }) => {
+                  const result =
+                    createSubmissionZodSchema.shape.title.safeParse(value);
+
+                  return result.success
+                    ? undefined
+                    : result.error.issues[0]?.message;
+                },
               }}
             >
               {(field) => (
                 <AppField
                   field={field}
-                  label="Service Location"
-                  placeholder="Street, House No, Area..."
+                  label="Submission Title"
+                  placeholder="Enter your project title"
                   append={
-                    <MapPin className="size-4 text-muted-foreground mr-2" />
+                    <FileText className="mr-2 size-4 text-muted-foreground" />
                   }
                 />
               )}
             </form.Field>
 
             <form.Field
-              name="activePhone"
+              name="description"
               validators={{
-                onChange: serviceRequestZodSchema.shape.activePhone,
+                onChange: ({ value }) => {
+                  const result =
+                    createSubmissionZodSchema.shape.description.safeParse(
+                      value,
+                    );
+
+                  return result.success
+                    ? undefined
+                    : result.error.issues[0]?.message;
+                },
               }}
             >
               {(field) => (
                 <AppField
                   field={field}
-                  label="Contact Number"
-                  placeholder="01745-678912"
+                  label="Project Description"
+                  placeholder="Describe your project and its features"
                   append={
-                    <Phone className="size-4 text-muted-foreground mr-2" />
+                    <FileText className="mr-2 size-4 text-muted-foreground" />
                   }
                 />
               )}
             </form.Field>
 
-            <form.Field name="serviceDescription">
+            <form.Field
+              name="githubUrl"
+              validators={{
+                onChange: ({ value }) => {
+                  const result =
+                    createSubmissionZodSchema.shape.githubUrl.safeParse(value);
+
+                  return result.success
+                    ? undefined
+                    : result.error.issues[0]?.message;
+                },
+              }}
+            >
               {(field) => (
                 <AppField
                   field={field}
-                  label="Additional Notes"
-                  placeholder="Any specific instructions for our experts?"
+                  label="GitHub Repository URL"
+                  placeholder="https://github.com/username/project"
                   append={
-                    <MessageSquare className="size-4 text-muted-foreground mr-2" />
+                    <GitBranch className="mr-2 size-4 text-muted-foreground" />
                   }
                 />
               )}
             </form.Field>
 
-            {/*   {serverError && (
-              <Alert variant="destructive" className="py-2">
-                <AlertDescription className="text-xs font-medium">
-                  {serverError}
-                </AlertDescription>
-              </Alert>
-            )} */}
+            <form.Field
+              name="liveUrl"
+              validators={{
+                onChange: ({ value }) => {
+                  const result =
+                    createSubmissionZodSchema.shape.liveUrl.safeParse(value);
 
-            <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting]}>
+                  return result.success
+                    ? undefined
+                    : result.error.issues[0]?.message;
+                },
+              }}
+            >
+              {(field) => (
+                <AppField
+                  field={field}
+                  label="Live Project URL"
+                  placeholder="https://your-project.vercel.app"
+                  append={
+                    <ExternalLink className="mr-2 size-4 text-muted-foreground" />
+                  }
+                />
+              )}
+            </form.Field>
+
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
               {([canSubmit, isSubmitting]) => (
                 <CustomSubmitButton
                   isPending={isSubmitting || isPending}
-                  pendingLabel="Submitting Request..."
-                  disabled={!canSubmit}
-                  className="w-full h-12 rounded-xl text-lg font-bold shadow-lg shadow-primary/20"
+                  pendingLabel="Submitting..."
+                  disabled={!canSubmit || isPending}
+                  className="h-12 w-full rounded-xl text-lg font-bold shadow-lg shadow-primary/20"
                 >
-                  Confirm Booking <Zap className="ml-2 size-5 fill-current" />
+                  Submit Application
+                  <Zap className="ml-2 size-5 fill-current" />
                 </CustomSubmitButton>
               )}
             </form.Subscribe>

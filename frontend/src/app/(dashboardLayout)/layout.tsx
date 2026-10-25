@@ -1,8 +1,7 @@
 import DashboardNavbar from "@/components/modules/Dashboard/DashboardNavbar";
 import DashboardSidebar from "@/components/modules/Dashboard/DashboardSidebar";
 
-// Dashboard uses auth/cookies, so we must avoid static prerendering during `next build`.
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 
 const RootDashboardLayout = async ({
   children,

@@ -70,21 +70,23 @@ function UserMenu({
 }: UserMenuProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 rounded-full px-2"
-          aria-label="Open user menu"
-        >
-          <span className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-            {initials}
-          </span>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 rounded-full px-2"
+            aria-label="Open user menu"
+          >
+            <span className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+              {initials}
+            </span>
 
-          <span className="hidden max-w-32 truncate text-sm font-medium sm:block">
-            {user.name}
-          </span>
-        </Button>
-      </DropdownMenuTrigger>
+            <span className="hidden max-w-32 truncate text-sm font-medium sm:block">
+              {user.name}
+            </span>
+          </Button>
+        }
+      />
 
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="font-normal">
@@ -99,19 +101,23 @@ function UserMenu({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild>
-          <Link href={dashboardPath}>
-            <LayoutDashboard className="mr-2 size-4" />
-            Dashboard
-          </Link>
-        </DropdownMenuItem>
+        <DropdownMenuItem
+          render={
+            <Link href={dashboardPath}>
+              <LayoutDashboard className="mr-2 size-4" />
+              Dashboard
+            </Link>
+          }
+        />
 
-        <DropdownMenuItem asChild>
-          <Link href={dashboardPath}>
-            <User className="mr-2 size-4" />
-            My Account
-          </Link>
-        </DropdownMenuItem>
+        <DropdownMenuItem
+          render={
+            <Link href={dashboardPath}>
+              <User className="mr-2 size-4" />
+              My Account
+            </Link>
+          }
+        />
 
         <DropdownMenuSeparator />
 
@@ -154,7 +160,11 @@ export default function CommonLayoutNavbar({
       .map((part) => part.charAt(0).toUpperCase())
       .join("") || "U";
 
-  const navItems = [{ title: "Home", url: "/" }];
+  const navItems = [
+    { title: "Home", url: "/" },
+    { title: "Contact Us", url: "/contact-us" },
+    { title: "Home", url: "/" },
+  ];
 
   const handleLogout = () => {
     startTransition(async () => {
@@ -167,7 +177,7 @@ export default function CommonLayoutNavbar({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
@@ -223,15 +233,14 @@ export default function CommonLayoutNavbar({
           ) : (
             <>
               {auth.login && (
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Login</Link>
-                </Button>
+                <Button
+                  variant="ghost"
+                  render={<Link href="/login">Login</Link>}
+                />
               )}
 
               {auth.register && (
-                <Button asChild>
-                  <Link href="/register">Get Started</Link>
-                </Button>
+                <Button render={<Link href="/register">Get Started</Link>} />
               )}
             </>
           )}
@@ -242,17 +251,19 @@ export default function CommonLayoutNavbar({
           <ModeToggle />
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label="Open navigation menu"
-              >
-                <Menu className="size-5" />
-              </Button>
-            </SheetTrigger>
+            <SheetTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label="Open navigation menu"
+                >
+                  <Menu className="size-5" />
+                </Button>
+              }
+            />
 
-            <SheetContent side="right" className="w-[300px] sm:w-[350px]">
+            <SheetContent side="right" className="w-75 sm:w-87.5">
               <SheetHeader>
                 <SheetTitle className="text-left">
                   <Link
@@ -280,14 +291,17 @@ export default function CommonLayoutNavbar({
                   aria-label="Mobile navigation"
                 >
                   {navItems.map((item) => (
-                    <SheetClose asChild key={item.url}>
-                      <Link
-                        href={item.url}
-                        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                      >
-                        {item.title}
-                      </Link>
-                    </SheetClose>
+                    <SheetClose
+                      key={item.url}
+                      render={
+                        <Link
+                          href={item.url}
+                          className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                        >
+                          {item.title}
+                        </Link>
+                      }
+                    />
                   ))}
                 </nav>
 
@@ -309,15 +323,19 @@ export default function CommonLayoutNavbar({
                         </div>
                       </div>
 
-                      <Button asChild variant="outline" className="w-full">
-                        <Link
-                          href={dashboardPath}
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <LayoutDashboard className="mr-2 size-4" />
-                          Dashboard
-                        </Link>
-                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        render={
+                          <Link
+                            href={dashboardPath}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <LayoutDashboard className="mr-2 size-4" />
+                            Dashboard
+                          </Link>
+                        }
+                      />
 
                       <Button
                         variant="destructive"
@@ -339,25 +357,32 @@ export default function CommonLayoutNavbar({
                   ) : (
                     <div className="flex flex-col gap-3">
                       {auth.login && (
-                        <Button asChild variant="outline" className="w-full">
-                          <Link
-                            href="/login"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            Login
-                          </Link>
-                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          render={
+                            <Link
+                              href="/login"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              Login
+                            </Link>
+                          }
+                        />
                       )}
 
                       {auth.register && (
-                        <Button asChild className="w-full">
-                          <Link
-                            href="/register"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            Get Started
-                          </Link>
-                        </Button>
+                        <Button
+                          className="w-full"
+                          render={
+                            <Link
+                              href="/register"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              Get Started
+                            </Link>
+                          }
+                        />
                       )}
                     </div>
                   )}

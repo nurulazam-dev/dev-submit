@@ -25,7 +25,7 @@ const ContactUs = () => {
           </h2>
           <p className="text-lg text-muted-foreground">
             Have questions about our services or need help as a provider? Our
-            team at MNA ServiceHub is here to support you 24/7.
+            team at MNA DevSubmit is here to support you 24/7.
           </p>
         </div>
 
@@ -82,7 +82,7 @@ const ContactUs = () => {
                     <h4 className="font-semibold text-lg">Headquarters</h4>
                     <p className="text-muted-foreground">Dhaka, Bangladesh</p>
                     <p className="text-sm text-muted-foreground italic">
-                      MNA ServiceHub Plaza
+                      MNA DevSubmit Plaza
                     </p>
                   </div>
                 </CardContent>
@@ -97,7 +97,7 @@ const ContactUs = () => {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Our MNA ServiceHub platform is active 24/7. Human support is
+                Our MNA DevSubmit platform is active 24/7. Human support is
                 available during business hours.
               </p>
             </div>

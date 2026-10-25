@@ -1,28 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  ShieldCheck,
-  Calendar,
-  Clock,
-  //   Edit3,
-  Verified,
-} from "lucide-react";
+import { User, Mail, Phone, MapPin, ShieldCheck, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { IAuthUser } from "@/types/auth.types";
 // import { Button } from "@/components/ui/button";
 
-export default function MyProfile({ userData }: { userData: any }) {
+export default function MyProfile({ userData }: { userData: IAuthUser }) {
   if (!userData) return null;
 
-  const createdAt = format(new Date(userData.createdAt), "PPP");
-  const updatedAt = format(new Date(userData.updatedAt), "PPP");
+  const createdAt = format(
+    new Date(userData?.createdAt ? userData?.createdAt : "Invalid Date"),
+    "PPP",
+  );
+  // const updatedAt = format(new Date(userData.updatedAt), "PPP");
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-8">
@@ -35,7 +28,7 @@ export default function MyProfile({ userData }: { userData: any }) {
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
                 <Avatar className="h-32 w-32 border-4 border-white dark:border-slate-800 shadow-2xl relative">
-                  <AvatarImage src={userData?.image} alt={userData.name} />
+                  {/* <AvatarImage src={userData?.image} alt={userData.name} /> */}
                   <AvatarFallback className="bg-primary text-white text-4xl font-bold">
                     {userData.name.charAt(0)}
                   </AvatarFallback>
@@ -53,9 +46,7 @@ export default function MyProfile({ userData }: { userData: any }) {
                   <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                     {userData.name}
                   </h1>
-                  {userData.emailVerified && (
-                    <Verified className="w-6 h-6 text-blue-500" />
-                  )}
+
                   <Badge
                     variant="secondary"
                     className="px-3 py-1 bg-primary/10 text-primary border-none font-semibold"
@@ -65,8 +56,8 @@ export default function MyProfile({ userData }: { userData: any }) {
                 </div>
 
                 <p className="text-slate-500 dark:text-slate-400 max-w-md">
-                  Experience a centralized digital platform connecting customers
-                  and top-tier service providers.
+                  Experience a centralized digital platform connecting students
+                  and top-tier mentors.
                 </p>
 
                 {/*  <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
@@ -129,8 +120,8 @@ export default function MyProfile({ userData }: { userData: any }) {
             </CardHeader>
             <CardContent className="p-8 text-slate-600 dark:text-slate-400 leading-relaxed">
               Managing the system as an {userData.role}. Responsible for
-              overseeing all service requests, user management, and provider
-              coordination within the <strong>MNA ServiceHub</strong> ecosystem.
+              overseeing all submission, and review coordination within the{" "}
+              <strong>MNA DevSubmit</strong> ecosystem.
             </CardContent>
           </Card>
         </div>
@@ -147,11 +138,11 @@ export default function MyProfile({ userData }: { userData: any }) {
                 label="Joined On"
                 value={createdAt}
               />
-              <MetaItem
+              {/* <MetaItem
                 icon={<Clock className="w-4 h-4 text-orange-500" />}
                 label="Last Updated"
                 value={updatedAt}
-              />
+              /> */}
               <div className="pt-4 border-t">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-500">Account Status</span>
@@ -174,9 +165,9 @@ export default function MyProfile({ userData }: { userData: any }) {
                 : "pending review"}
               .
             </p>
-            <div className="bg-white/20 rounded-lg p-3 text-xs font-mono">
-              PID: {userData.id.substring(0, 12)}...
-            </div>
+            {/* <div className="bg-white/20 rounded-lg p-3 text-xs font-mono">
+              PID: {userData?.userId.substring(0, 12)}...
+            </div> */}
           </div>
         </div>
       </div>

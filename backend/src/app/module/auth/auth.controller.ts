@@ -20,7 +20,11 @@ const registerStudent = catchAsync(async (req: Request, res: Response) => {
     httpStatusCode: status.CREATED,
     success: true,
     message: "Student registered successfully",
-    data: user,
+    data: {
+      user,
+      accessToken,
+      refreshToken,
+    },
   });
 });
 
@@ -36,7 +40,11 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     httpStatusCode: status.OK,
     success: true,
     message: "User logged in successfully",
-    data: user,
+    data: {
+      user,
+      accessToken,
+      refreshToken,
+    },
   });
 });
 
@@ -62,7 +70,10 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getNewToken = catchAsync(async (req: Request, res: Response) => {
-  const token = CookieUtils.getCookie(req, "refreshToken");
+  const token =
+    CookieUtils.getCookie(req, "refreshToken") ||
+    req.body?.refreshToken ||
+    (req.headers["x-refresh-token"] as string);
 
   if (!token) {
     throw new AppError(status.UNAUTHORIZED, "Refresh token is missing!");
@@ -77,6 +88,10 @@ const getNewToken = catchAsync(async (req: Request, res: Response) => {
     httpStatusCode: status.OK,
     success: true,
     message: "New token generated successfully",
+    data: {
+      accessToken,
+      refreshToken,
+    },
   });
 });
 
@@ -115,6 +130,10 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
     httpStatusCode: status.OK,
     success: true,
     message: "Password changed successfully",
+    data: {
+      accessToken,
+      refreshToken,
+    },
   });
 });
 

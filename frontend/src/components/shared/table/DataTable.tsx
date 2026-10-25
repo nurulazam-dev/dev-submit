@@ -15,23 +15,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PaginationMeta } from "@/types/api.types";
+import type { PaginationMeta } from "@/types/api.types";
 import {
-  ColumnDef,
+  createPaginatedRowModel,
+  createSortedRowModel,
   flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  stockFeatures,
+  tableFeatures,
+  useTable,
+} from "@tanstack/react-table";
+import type {
+  ColumnDef,
   PaginationState,
+  RowData,
   SortingState,
-  useReactTable,
+  StockFeatures,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
 import DataTableFilters, {
-  DataTableFilterConfig,
-  DataTableFilterValue,
-  DataTableFilterValues,
+  type DataTableFilterConfig,
+  type DataTableFilterValue,
+  type DataTableFilterValues,
 } from "./DataTableFilters";
 import DataTablePagination from "./DataTablePagination";
 import DataTableSearch from "./DataTableSearch";
@@ -42,9 +46,9 @@ interface DataTableActions<TData> {
   onDelete?: (data: TData) => void;
 }
 
-interface DataTableProps<TData> {
+interface DataTableProps<TData extends RowData> {
   data: TData[];
-  columns: ColumnDef<TData>[];
+  columns: ColumnDef<StockFeatures, TData>[];
   actions?: DataTableActions<TData>;
   toolbarAction?: React.ReactNode;
   emptyMessage?: string;
@@ -75,8 +79,14 @@ interface DataTableProps<TData> {
   meta?: PaginationMeta;
 }
 
-const DataTable = <TData,>({
-  data = [] as TData[],
+const dataTableFeatures = tableFeatures({
+  ...stockFeatures,
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+});
+
+const DataTable = <TData extends RowData>({
+  data = [],
   columns,
   actions,
   toolbarAction,
@@ -88,21 +98,13 @@ const DataTable = <TData,>({
   filters,
   meta,
 }: DataTableProps<TData>) => {
-  const [hasHydrated, setHasHydrated] = useState(false);
+  const showLoadingOverlay = Boolean(isLoading);
 
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
-
-  const showLoadingOverlay = Boolean(isLoading) && hasHydrated;
-
-  const tableColumns: ColumnDef<TData>[] = actions
+  const tableColumns: ColumnDef<StockFeatures, TData>[] = actions
     ? [
         ...columns,
-
-        // Action column
         {
-          id: "actions", // Unique id for the column
+          id: "actions",
           header: "Actions",
           enableSorting: false,
           cell: ({ row }) => {
@@ -112,7 +114,7 @@ const DataTable = <TData,>({
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
-                    <Button variant={"ghost"} className="h-8 w-8 p-0">
+                    <Button variant="ghost" className="h-8 w-8 p-0">
                       <span className="sr-only">Open Menu</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -147,48 +149,44 @@ const DataTable = <TData,>({
       ]
     : columns;
 
-  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table is intentionally used here and React Compiler already skips memoization for this hook.
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns: tableColumns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    manualSorting: !!sorting,
-    manualPagination: !!pagination,
+
+    manualSorting: Boolean(sorting),
+    manualPagination: Boolean(pagination),
+
     pageCount: pagination ? Math.max(meta?.totalPages ?? 0, 0) : undefined,
+
     state: {
       ...(sorting ? { sorting: sorting.state } : {}),
       ...(pagination ? { pagination: pagination.state } : {}),
     },
+
     onSortingChange: sorting
       ? (updater) => {
-          const currentSortingState = sorting.state;
-
           const nextSortingState =
-            typeof updater === "function"
-              ? updater(currentSortingState)
-              : updater;
+            typeof updater === "function" ? updater(sorting.state) : updater;
 
           sorting.onSortingChange(nextSortingState);
         }
       : undefined,
+
     onPaginationChange: pagination
       ? (updater) => {
-          const currentPaginationState = pagination.state;
           const nextPaginationState =
-            typeof updater === "function"
-              ? updater(currentPaginationState)
-              : updater;
+            typeof updater === "function" ? updater(pagination.state) : updater;
 
           pagination.onPaginationChange(nextPaginationState);
         }
       : undefined,
   });
+
   return (
     <div className="relative">
       {showLoadingOverlay && (
-        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             <span className="text-sm text-muted-foreground">Loading...</span>
@@ -225,17 +223,16 @@ const DataTable = <TData,>({
         </div>
       )}
 
-      {/* // Table */}
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}>
-                {hg.headers.map((header) => (
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <Button
-                        variant={"ghost"}
+                        variant="ghost"
                         className="h-auto cursor-pointer p-0 font-semibold hover:bg-transparent hover:text-inherit focus-visible:ring-0"
                         onClick={header.column.getToggleSortingHandler()}
                       >
@@ -263,8 +260,9 @@ const DataTable = <TData,>({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
-            {table.getRowModel()?.rows?.length ? (
+            {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -293,6 +291,7 @@ const DataTable = <TData,>({
         {pagination && (
           <DataTablePagination
             table={table}
+            pagination={pagination.state}
             totalPages={meta?.totalPages}
             totalRows={meta?.total}
             isLoading={isLoading}

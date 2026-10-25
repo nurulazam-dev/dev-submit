@@ -1,3 +1,3 @@
 export default function ResetPasswordPage() {
-  return <div>ResetPasswordPage</div>;
+  return <div>Reset Password Page coming soon...</div>;
 }

@@ -11,5 +11,6 @@ export const submissionFilterableFields = ["status"];
 export const submissionSortableFields = ["createdAt", "studentId"];
 
 export const submissionIncludeConfig = {
-  reviews: true,
+  review: true,
+  student: true,
 } as const;

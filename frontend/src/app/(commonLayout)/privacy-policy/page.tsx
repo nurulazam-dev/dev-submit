@@ -6,211 +6,516 @@ import {
   Mail,
   Info,
   ChevronRight,
-  User,
-  Briefcase,
+  UserRound,
+  Code2,
+  Database,
+  CheckCircle2,
+  Fingerprint,
+  ArrowUpRight,
+  ShieldCheck,
 } from "lucide-react";
 
+const sections = [
+  {
+    id: "introduction",
+    title: "Introduction",
+    icon: Info,
+    number: "01",
+  },
+  {
+    id: "data-collection",
+    title: "Information We Collect",
+    icon: Database,
+    number: "02",
+  },
+  {
+    id: "usage",
+    title: "How We Use Information",
+    icon: Eye,
+    number: "03",
+  },
+  {
+    id: "security",
+    title: "Data Security",
+    icon: Lock,
+    number: "04",
+  },
+  {
+    id: "contact",
+    title: "Contact",
+    icon: Mail,
+    number: "05",
+  },
+];
+
+const dataCards = [
+  {
+    icon: UserRound,
+    title: "Account Information",
+    description:
+      "Name, email address, and phone number provided when creating or managing an account.",
+    tag: "IDENTITY",
+  },
+  {
+    icon: Code2,
+    title: "Submission Information",
+    description:
+      "Project titles, descriptions, repository links, live project links, and related submission details.",
+    tag: "PROJECTS",
+  },
+  {
+    icon: Fingerprint,
+    title: "Account & Activity Data",
+    description:
+      "Information associated with account access, submission status, and platform interactions.",
+    tag: "ACTIVITY",
+  },
+  {
+    icon: FileText,
+    title: "Feedback & Reviews",
+    description:
+      "Feedback, reviews, and related information submitted through the platform.",
+    tag: "FEEDBACK",
+  },
+];
+
+const usageItems = [
+  {
+    title: "Operate the platform",
+    description:
+      "Manage accounts and provide the platform's submission and review features.",
+  },
+  {
+    title: "Manage submissions",
+    description:
+      "Track submitted projects, submission statuses, and associated feedback.",
+  },
+  {
+    title: "Communicate with users",
+    description:
+      "Support relevant account communications and service-related notifications.",
+  },
+  {
+    title: "Protect platform integrity",
+    description:
+      "Help maintain account security and identify suspicious or unauthorized activity.",
+  },
+];
+
 export default function PrivacyPolicyPage() {
-  const sections = [
-    {
-      id: "introduction",
-      title: "Introduction",
-      icon: <Info className="size-4" />,
-    },
-    {
-      id: "data-collection",
-      title: "Data We Collect",
-      icon: <FileText className="size-4" />,
-    },
-    { id: "usage", title: "How We Use Data", icon: <Eye className="size-4" /> },
-    {
-      id: "security",
-      title: "Data Security",
-      icon: <Lock className="size-4" />,
-    },
-    { id: "contact", title: "Contact Us", icon: <Mail className="size-4" /> },
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 transition-colors duration-300 pb-20">
-      {/* Header Section */}
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-16 text-center relative overflow-hidden">
-        {/* Decorative Background Blur */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 dark:bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+      {/* Ambient background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-145 overflow-hidden"
+      >
+        <div className="absolute left-1/2 top-70 size-162.5 -translate-x-1/2 rounded-full bg-primary/9 blur-[120px]" />
+        <div className="absolute -right-37.5 top-40 size-75 rounded-full bg-blue-500/[0.07] blur-[100px]" />
+        <div className="absolute -left-37.5 top-65 size-75 rounded-full bg-cyan-500/6 blur-[100px]" />
+      </div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex justify-center mb-6">
-            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-3xl text-primary animate-bounce shadow-inner">
-              <Shield className="size-12 md:size-16" />
+      {/* Hero */}
+      <section className="relative border-b border-border/70">
+        <div className="mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-24 lg:px-8 lg:pt-28">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-2 text-sm font-medium text-primary shadow-sm">
+              <ShieldCheck className="size-4" />
+              Your privacy matters
+              <span className="ml-1 size-1.5 rounded-full bg-primary" />
+            </div>
+
+            <h1 className="text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl">
+              Privacy, built on{" "}
+              <span className="bg-linear-to-r from-primary via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                trust.
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg">
+              Your projects deserve a secure place to grow. Learn what
+              information Dev Submit collects, how it is used, and how we
+              approach protecting your privacy.
+            </p>
+
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-card/80 px-4 py-3 text-sm shadow-sm backdrop-blur">
+                <FileText className="size-4 text-primary" />
+                Privacy policy
+              </div>
+
+              <div className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-card/80 px-4 py-3 text-sm text-muted-foreground shadow-sm backdrop-blur">
+                <Lock className="size-4 text-primary" />
+                Data protection
+              </div>
             </div>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight dark:text-white transition-all">
-            Privacy Policy
-          </h1>
-          <p className="mt-6 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            At MNA-ServiceHub, your privacy is our priority. Learn how we handle
-            your data with total transparency and bank-grade security.
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-2 text-sm font-semibold text-primary bg-primary/5 dark:bg-primary/10 w-fit mx-auto px-5 py-2 rounded-full border border-primary/20">
-            Last Updated: April 12, 2026
+
+          {/* Trust indicators */}
+          <div className="mx-auto mt-14 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+            {[
+              {
+                icon: Eye,
+                title: "Transparency",
+                description: "Understand our data practices",
+              },
+              {
+                icon: Shield,
+                title: "Privacy awareness",
+                description: "Thoughtful handling of information",
+              },
+              {
+                icon: Fingerprint,
+                title: "Account protection",
+                description: "Security-conscious practices",
+              },
+            ].map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <div
+                  key={item.title}
+                  className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card/70 p-4 text-left backdrop-blur transition-colors hover:border-primary/30"
+                >
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="size-5" />
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-semibold">{item.title}</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </header>
+      </section>
 
-      <div className="container mx-auto px-4 mt-12">
-        <div className="flex flex-col lg:flex-row gap-12">
-          {/* Sticky Navigation - Desktop */}
-          <aside className="lg:w-1/4 hidden lg:block">
-            <div className="sticky top-24 space-y-1 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all">
-              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-3 mb-4">
-                Contents
-              </p>
-              {sections.map((section) => (
-                <a
-                  key={section.id}
-                  href={`#${section.id}`}
-                  className="flex items-center justify-between group px-3 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-primary rounded-xl transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="group-hover:scale-110 transition-transform text-slate-400 group-hover:text-primary">
-                      {section.icon}
-                    </span>
-                    {section.title}
-                  </div>
-                  <ChevronRight className="size-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-                </a>
-              ))}
+      {/* Main content */}
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
+          {/* Table of contents */}
+          <aside className="lg:sticky lg:top-24">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                    On this page
+                  </p>
+                  <h2 className="mt-1 text-lg font-bold">Contents</h2>
+                </div>
+
+                <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <FileText className="size-4" />
+                </div>
+              </div>
+
+              <nav aria-label="Privacy policy contents" className="space-y-1">
+                {sections.map((section) => {
+                  const Icon = section.icon;
+
+                  return (
+                    <a
+                      key={section.id}
+                      href={`#${section.id}`}
+                      className="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-muted-foreground transition-all hover:bg-primary/[0.07] hover:text-foreground"
+                    >
+                      <span className="font-mono text-xs text-muted-foreground/60 group-hover:text-primary">
+                        {section.number}
+                      </span>
+
+                      <Icon className="size-4 shrink-0 group-hover:text-primary" />
+
+                      <span className="min-w-0 flex-1 font-medium">
+                        {section.title}
+                      </span>
+
+                      <ChevronRight className="size-4 shrink-0 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+                    </a>
+                  );
+                })}
+              </nav>
+
+              <div className="mt-6 rounded-xl border border-primary/15 bg-primary/5 p-4">
+                <ShieldCheck className="size-5 text-primary" />
+
+                <p className="mt-3 text-sm font-semibold">
+                  Your information matters
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Review this policy to understand how information is handled
+                  when using Dev Submit.
+                </p>
+              </div>
             </div>
           </aside>
 
-          {/* Policy Content */}
-          <main className="lg:w-3/4 space-y-8">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 shadow-sm hover:shadow-md transition-shadow">
-              <article className="prose prose-slate dark:prose-invert max-w-none space-y-12">
-                {/* 01. Introduction */}
-                <section id="introduction" className="scroll-mt-28 group">
-                  <h2 className="text-3xl font-bold flex items-center gap-3 dark:text-white group-hover:text-primary transition-colors">
-                    <span className="text-primary/40 font-mono text-xl">
-                      01.
-                    </span>{" "}
-                    Introduction
-                  </h2>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
-                    Welcome to <strong>MNA-ServiceHub</strong>. We value the
-                    trust you place in us when sharing your personal
-                    information. This Privacy Policy explains what data we
-                    collect, how we use it, and the steps we take to ensure it
-                    remains protected.
-                  </p>
-                </section>
+          {/* Policy */}
+          <article className="min-w-0 space-y-6">
+            {/* Introduction */}
+            <section
+              id="introduction"
+              className="scroll-mt-28 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-9"
+            >
+              <SectionHeading
+                number="01"
+                eyebrow="WELCOME TO DEV SUBMIT"
+                title="Introduction"
+                icon={Info}
+              />
 
-                <hr className="border-slate-100 dark:border-slate-800" />
+              <div className="mt-6 space-y-4 text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8">
+                <p>
+                  Welcome to{" "}
+                  <strong className="text-foreground">Dev Submit</strong>. We
+                  recognize that your personal information deserves careful
+                  handling. This Privacy Policy explains the types of
+                  information that may be collected when you use the platform,
+                  how that information may be used, and the importance of
+                  protecting it.
+                </p>
 
-                {/* 02. Data We Collect */}
-                <section id="data-collection" className="scroll-mt-28 group">
-                  <h2 className="text-3xl font-bold flex items-center gap-3 dark:text-white group-hover:text-primary transition-colors">
-                    <span className="text-primary/40 font-mono text-xl">
-                      02.
-                    </span>{" "}
-                    Data We Collect
-                  </h2>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    To provide a seamless service marketplace experience, we
-                    collect specific types of information:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border-t-4 border-primary shadow-sm hover:scale-[1.02] transition-transform">
-                      <User className="text-primary mb-3 size-6" />
-                      <h4 className="font-bold mb-2">Personal Identity</h4>
-                      <p className="text-sm m-0 opacity-80">
-                        Name, email address, and phone number used for secure
-                        account management.
+                <p>
+                  By using Dev Submit, you can refer to this policy to
+                  understand our stated privacy practices. The information
+                  provided here should be read alongside any applicable notices
+                  presented when you use specific platform features.
+                </p>
+              </div>
+            </section>
+
+            {/* Data collection */}
+            <section
+              id="data-collection"
+              className="scroll-mt-28 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-9"
+            >
+              <SectionHeading
+                number="02"
+                eyebrow="INFORMATION & DATA"
+                title="Information We Collect"
+                icon={Database}
+              />
+
+              <p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-base">
+                Depending on how you use the platform, the following categories
+                of information may be relevant to providing and managing Dev
+                Submit features.
+              </p>
+
+              <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {dataCards.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <div
+                      key={item.title}
+                      className="group rounded-2xl border border-border/80 bg-muted/30 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:bg-primary/[0.035] hover:shadow-md"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex size-11 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                          <Icon className="size-5" />
+                        </div>
+
+                        <span className="rounded-md border border-border px-2 py-1 text-[10px] font-bold tracking-wider text-muted-foreground">
+                          {item.tag}
+                        </span>
+                      </div>
+
+                      <h3 className="mt-5 font-bold tracking-tight">
+                        {item.title}
+                      </h3>
+
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        {item.description}
                       </p>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border-t-4 border-primary shadow-sm hover:scale-[1.02] transition-transform">
-                      <Briefcase className="text-primary mb-3 size-6" />
-                      <h4 className="font-bold mb-2">Service Data</h4>
-                      <p className="text-sm m-0 opacity-80">
-                        Service listings, portfolio details for providers, and
-                        history for tracking.
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Usage */}
+            <section
+              id="usage"
+              className="scroll-mt-28 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-9"
+            >
+              <SectionHeading
+                number="03"
+                eyebrow="PURPOSE & TRANSPARENCY"
+                title="How We Use Information"
+                icon={Eye}
+              />
+
+              <p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-base">
+                Information may be used to support the platform&apos;s core
+                functionality and help maintain a reliable experience. Relevant
+                purposes may include:
+              </p>
+
+              <div className="mt-7 space-y-3">
+                {usageItems.map((item, index) => (
+                  <div
+                    key={item.title}
+                    className="flex gap-4 rounded-xl border border-border/70 p-4 transition-colors hover:border-primary/25 hover:bg-muted/30 sm:p-5"
+                  >
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-mono text-sm font-bold text-primary">
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold">{item.title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        {item.description}
                       </p>
                     </div>
                   </div>
-                </section>
+                ))}
+              </div>
+            </section>
 
-                <hr className="border-slate-100 dark:border-slate-800" />
+            {/* Security */}
+            <section
+              id="security"
+              className="scroll-mt-28 overflow-hidden rounded-2xl border border-primary/20 bg-linear-to-br from-primary/8 via-card to-card shadow-sm"
+            >
+              <div className="relative p-6 sm:p-9">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-12 -top-12 size-52 rounded-full border border-primary/10"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-2 -top-2 size-32 rounded-full border border-primary/10"
+                />
 
-                {/* 03. How We Use Your Data */}
-                <section id="usage" className="scroll-mt-28 group">
-                  <h2 className="text-3xl font-bold dark:text-white group-hover:text-primary transition-colors">
-                    03. Usage Policy
-                  </h2>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mt-6 list-none p-0">
-                    {[
-                      "Facilitate bookings between users.",
-                      "Secure payment gateway integration.",
-                      "Real-time security alerts via email/OTP.",
-                      "Algorithm optimization for user feedback.",
-                    ].map((item, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center gap-3 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/30 p-3 rounded-lg"
-                      >
-                        <div className="size-2 rounded-full bg-primary" />{" "}
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
+                <SectionHeading
+                  number="04"
+                  eyebrow="SECURITY & RESPONSIBILITY"
+                  title="Data Security"
+                  icon={Lock}
+                />
 
-                {/* 04. Data Security */}
-                <section id="security" className="scroll-mt-28 mt-12">
-                  <div className="bg-blue-50 dark:bg-primary/5 border border-blue-100 dark:border-primary/20 p-8 rounded-3xl relative overflow-hidden group">
-                    <Lock className="absolute -right-4 -bottom-4 size-32 opacity-5 text-primary group-hover:rotate-12 transition-transform duration-700" />
-                    <h2 className="text-2xl font-bold flex items-center gap-3 dark:text-white m-0 mb-4">
-                      <Lock className="text-primary size-6" /> 4. Data Security
-                    </h2>
-                    <p className="m-0 text-slate-700 dark:text-slate-300 font-medium relative z-10">
-                      We use industry-standard encryption (AES-256) and secure
-                      authentication (JWT) to protect your data. Your sensitive
-                      information is salted and hashed, never stored in plain
-                      text.
+                <p className="relative mt-6 text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8">
+                  Protecting information is an important part of operating a
+                  platform. Appropriate safeguards should be used to help
+                  protect information against unauthorized access, alteration,
+                  disclosure, or loss.
+                </p>
+
+                <div className="relative mt-6 flex gap-3 rounded-xl border border-border/80 bg-background/75 p-4 backdrop-blur">
+                  <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
+
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    No online platform can guarantee absolute security. Specific
+                    security measures depend on the systems and services
+                    actually implemented by the platform.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Contact */}
+            <section
+              id="contact"
+              className="scroll-mt-28 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-9"
+            >
+              <SectionHeading
+                number="05"
+                eyebrow="WE ARE HERE TO HELP"
+                title="Contact & Questions"
+                icon={Mail}
+              />
+
+              <p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8">
+                If you have questions about this Privacy Policy or how
+                information is handled on Dev Submit, please contact the
+                platform team through its official support channel.
+              </p>
+
+              <div className="mt-7 flex flex-col gap-4 rounded-2xl border border-border bg-muted/30 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Mail className="size-5" />
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold">Privacy inquiries</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Contact the Dev Submit team
                     </p>
                   </div>
-                </section>
+                </div>
 
-                {/* 05. Contact Us */}
-                <section id="contact" className="scroll-mt-28 pt-8">
-                  <h2 className="text-3xl font-bold dark:text-white">
-                    05. Contact Us
-                  </h2>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    If you have any questions regarding this policy, feel free
-                    to reach out to our privacy team:
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                  Official support channel
+                  <ArrowUpRight className="size-4" />
+                </div>
+              </div>
+            </section>
+
+            {/* Closing note */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-border/70 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <CheckCircle2 className="size-5" />
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold">
+                    Thank you for using Dev Submit
                   </p>
-                  <div className="mt-8">
-                    <a
-                      href="mailto:support@mna-servicehub.com"
-                      className="group inline-flex items-center gap-4 p-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold hover:shadow-2xl hover:shadow-primary/20 transition-all hover:-translate-y-1"
-                    >
-                      <div className="bg-primary/20 p-3 rounded-xl group-hover:bg-primary transition-colors">
-                        <Mail className="size-6 text-primary group-hover:text-white" />
-                      </div>
-                      <div className="text-left">
-                        <span className="block text-xs opacity-50 uppercase tracking-tighter">
-                          Official Email
-                        </span>
-                        <span className="text-lg">
-                          support@mna-servicehub.com
-                        </span>
-                      </div>
-                    </a>
-                  </div>
-                </section>
-              </article>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Please review this policy periodically.
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href="#introduction"
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                Back to top
+                <ChevronRight className="-rotate-90 size-4" />
+              </a>
             </div>
-          </main>
+          </article>
         </div>
+      </div>
+    </main>
+  );
+}
+
+function SectionHeading({
+  number,
+  eyebrow,
+  title,
+  icon: Icon,
+}: {
+  number: string;
+  eyebrow: string;
+  title: string;
+  icon: typeof Shield;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+        <span>{number}</span>
+        <span className="h-px w-7 bg-primary/40" />
+        <span>{eyebrow}</span>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3 sm:gap-4">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary sm:size-12">
+          <Icon className="size-5 sm:size-6" />
+        </div>
+
+        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          {title}
+        </h2>
       </div>
     </div>
   );

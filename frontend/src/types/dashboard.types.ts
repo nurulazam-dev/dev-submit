@@ -21,28 +21,15 @@ export interface IMonthlyStats {
   count: number;
 }
 
-export interface PieChartData {
-  status: TSubmissionStatus;
-  count: number;
-}
-
-export interface BarChartData {
-  month: string;
-  count: number;
-}
-
 export interface IAdminDashboardStats {
   userCount: number;
   adminCount: number;
   studentCount: number;
-
   submissionCount: number;
   pendingSubmissions: number;
   approvedSubmissions: number;
   rejectedSubmissions: number;
-
   reviewCount: number;
-
   requestStatusDistribution: IStatusDistribution[];
   monthlyRequests: IMonthlyStats[];
 }

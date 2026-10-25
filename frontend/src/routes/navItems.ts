@@ -87,22 +87,17 @@ export const adminNavItems: NavSection[] = [
 
 export const studentNavItems: NavSection[] = [
   {
-    title: "My Submissions",
+    title: "Submissions",
     items: [
       {
-        title: "All My Submissions",
+        title: "My Submissions",
         href: "/dashboard/my-submissions",
         icon: "FileText",
-      },
-      {
-        title: "Create Submission",
-        href: "/dashboard/submissions/create",
-        icon: "FilePlus",
       },
     ],
   },
   {
-    title: "Reviews",
+    title: "Feedback & Reviews",
     items: [
       {
         title: "My Reviews",

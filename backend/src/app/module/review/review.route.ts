@@ -16,15 +16,15 @@ router.post(
 );
 
 router.get(
-  "/:id",
-  checkAuth("STUDENT", "ADMIN"),
-  ReviewController.getReviewById,
-);
-
-router.get(
   "/admin/my-reviews",
   checkAuth("ADMIN"),
   ReviewController.getMyReviews,
+);
+
+router.get(
+  "/:id",
+  checkAuth("STUDENT", "ADMIN"),
+  ReviewController.getReviewById,
 );
 
 router.patch(

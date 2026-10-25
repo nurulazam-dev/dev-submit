@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { changePasswordService } from "@/services/auth.services";
 import { Button } from "@/components/ui/button";
 import { logoutUserAction } from "@/actions/auth.action";
+import { IChangePasswordPayload } from "@/zod/auth.validation";
 
 export default function ChangePassword() {
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,9 @@ export default function ChangePassword() {
     const payload = Object.fromEntries(formData);
 
     try {
-      const res = await changePasswordService(payload);
+      const res = await changePasswordService(
+        payload as IChangePasswordPayload,
+      );
 
       if (res.success) {
         toast.success("Security updated! Your password has been changed.");

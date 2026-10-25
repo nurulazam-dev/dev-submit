@@ -5,7 +5,6 @@ export const authRoutes = [
   "/register",
   "/forgot-password",
   "/reset-password",
-  "/verify-email",
 ];
 
 export const isAuthRoute = (pathname: string): boolean => {
@@ -18,8 +17,8 @@ export type RouteConfig = {
 };
 
 export const commonProtectedRoutes: RouteConfig = {
-  exact: ["/profile", "/profile/settings", "/change-password"],
-  pattern: [],
+  exact: ["/profile", "/profile/me", "/change-password"],
+  pattern: [/^\/profile(?:\/|$)/, /^\/change-password(?:\/|$)/],
 };
 
 export const adminProtectedRoutes: RouteConfig = {
@@ -44,16 +43,16 @@ export const isRouteMatches = (
 };
 
 export const getRouteOwner = (pathname: string): UserRole | "COMMON" | null => {
+  if (isRouteMatches(pathname, commonProtectedRoutes)) {
+    return "COMMON";
+  }
+
   if (isRouteMatches(pathname, adminProtectedRoutes)) {
     return "ADMIN";
   }
 
   if (isRouteMatches(pathname, studentProtectedRoutes)) {
     return "STUDENT";
-  }
-
-  if (isRouteMatches(pathname, commonProtectedRoutes)) {
-    return "COMMON";
   }
 
   return null;

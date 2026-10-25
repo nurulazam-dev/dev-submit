@@ -8,24 +8,17 @@ import {
 import { httpClient } from "@/lib/axios/httpClient";
 import { setTokenInCookies } from "@/lib/tokenUtils";
 import type { ApiErrorResponse } from "@/types/api.types";
-import type { ILoginResponse } from "@/types/auth.types";
+import type { IAuthUser, ILoginResponse } from "@/types/auth.types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
+  ILoginPayload,
+  IRegisterStudentPayload,
   loginZodSchema,
   registerStudentZodSchema,
 } from "@/zod/auth.validation";
 
 type ActionResult = ILoginResponse | ApiErrorResponse;
-
-type AuthUser = {
-  userId: string;
-  email: string;
-  name: string;
-  phone: string;
-  role: UserRole;
-  status: "ACTIVE" | "BLOCKED";
-};
 
 type AuthResponse = {
   success?: boolean;
@@ -33,23 +26,11 @@ type AuthResponse = {
   data?: {
     accessToken: string;
     refreshToken?: string;
-    user?: AuthUser;
+    user?: IAuthUser;
   };
   accessToken?: string;
   refreshToken?: string;
-  user?: AuthUser;
-};
-
-type LoginPayload = {
-  email: string;
-  password: string;
-};
-
-type RegisterStudentPayload = {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
+  user?: IAuthUser;
 };
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -107,7 +88,7 @@ const getRedirectUrl = (role: UserRole, redirectPath?: string): string =>
     : getDefaultDashboardRoute(role);
 
 export const loginAction = async (
-  payload: LoginPayload,
+  payload: ILoginPayload,
   redirectPath?: string,
 ): Promise<ActionResult> => {
   const parsedPayload = loginZodSchema.safeParse(payload);
@@ -159,7 +140,7 @@ export const loginAction = async (
 };
 
 export const registerStudentAction = async (
-  payload: RegisterStudentPayload,
+  payload: IRegisterStudentPayload,
 ): Promise<ActionResult> => {
   const parsedPayload = registerStudentZodSchema.safeParse(payload);
 
@@ -186,7 +167,7 @@ export const registerStudentAction = async (
   }
 };
 
-export const getCurrentUserAction = async (): Promise<AuthUser | null> => {
+export const getCurrentUserAction = async (): Promise<IAuthUser | null> => {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
@@ -203,7 +184,7 @@ export const getCurrentUserAction = async (): Promise<AuthUser | null> => {
 
     const data = getAuthData(response.data);
 
-    return data.user ?? (data as unknown as AuthUser);
+    return data.user ?? (data as unknown as IAuthUser);
   } catch {
     return null;
   }
@@ -287,7 +268,6 @@ export const logoutUserAction = async (): Promise<void> => {
   try {
     await httpClient.post("/auth/logout");
   } catch {
-    // Clear local authentication cookies even if the API request fails.
   } finally {
     const cookieStore = await cookies();
 

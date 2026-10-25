@@ -18,15 +18,15 @@ router.post(
 );
 
 router.get(
-  "/:id",
-  checkAuth("STUDENT", "ADMIN"),
-  SubmissionController.getSubmissionById,
-);
-
-router.get(
   "/students/my-submissions",
   checkAuth("STUDENT"),
   SubmissionController.getMySubmissions,
+);
+
+router.get(
+  "/:id",
+  checkAuth("STUDENT", "ADMIN"),
+  SubmissionController.getSubmissionById,
 );
 
 router.patch(

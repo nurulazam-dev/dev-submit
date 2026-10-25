@@ -66,10 +66,7 @@ const getAllReviews = async (query: IQueryParams) => {
     )
       .search()
       .filter()
-      // .include({
-      //   reviews: true,
-      // })
-      .dynamicInclude(reviewIncludeConfig)
+      .dynamicInclude(reviewIncludeConfig, ["submission", "reviewer"])
       .paginate()
       .sort()
       .fields()
@@ -94,10 +91,7 @@ const getMyReviews = async (query: IQueryParams, reviewerId: string) => {
         reviewerId,
       })
       .filter()
-      // .include({
-      //   reviews: true,
-      // })
-      .dynamicInclude(reviewIncludeConfig)
+      .dynamicInclude(reviewIncludeConfig, ["submission"])
       .paginate()
       .sort()
       .fields()
@@ -106,9 +100,10 @@ const getMyReviews = async (query: IQueryParams, reviewerId: string) => {
 };
 
 const getReviewById = async (id: string) => {
-  const result = await db.orm.public.Review.first({
-    id,
-  });
+  const result = await db.orm.public.Review.where({ id })
+    .include("submission")
+    .include("reviewer")
+    .first();
 
   if (!result) {
     throw new AppError(status.NOT_FOUND, "Review not found!");

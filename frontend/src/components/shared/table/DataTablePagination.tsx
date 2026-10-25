@@ -10,7 +10,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Table as TanstackTable } from "@tanstack/react-table";
+import type {
+  PaginationState,
+  RowData,
+  StockFeatures,
+  Table as TanstackTable,
+} from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -18,19 +23,14 @@ type PaginationToken = number | "start-ellipsis" | "end-ellipsis";
 
 const DEFAULT_PAGE_SIZES = [1, 10, 20, 50, 100] as const;
 
-const isDefaultPageSize = (value: number) => {
-  return DEFAULT_PAGE_SIZES.includes(
-    value as (typeof DEFAULT_PAGE_SIZES)[number],
-  );
-};
+const isDefaultPageSize = (value: number) =>
+  DEFAULT_PAGE_SIZES.includes(value as (typeof DEFAULT_PAGE_SIZES)[number]);
 
 const getPaginationItems = (
   currentPage: number,
   totalPages: number,
 ): PaginationToken[] => {
-  if (totalPages <= 0) {
-    return [];
-  }
+  if (totalPages <= 0) return [];
 
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -65,30 +65,30 @@ const getPaginationItems = (
   ];
 };
 
-interface DataTablePaginationProps<TData> {
-  table: TanstackTable<TData>;
+interface DataTablePaginationProps<TData extends RowData> {
+  table: TanstackTable<StockFeatures, TData>;
+  pagination: PaginationState;
   totalRows?: number;
   totalPages?: number;
   isLoading?: boolean;
 }
 
-const DataTablePagination = <TData,>({
+const DataTablePagination = <TData extends RowData>({
   table,
+  pagination,
   totalRows,
   totalPages,
   isLoading,
 }: DataTablePaginationProps<TData>) => {
-  const pagination = table.getState().pagination;
   const pageSize = pagination.pageSize;
   const currentPage = pagination.pageIndex + 1;
-  const computedTotalPages = totalPages ?? table.getPageCount();
 
-  const [isCustomMode, setIsCustomMode] = useState<boolean>(
-    !isDefaultPageSize(pageSize),
+  const computedTotalPages = Math.max(0, totalPages ?? table.getPageCount());
+
+  const [isCustomMode, setIsCustomMode] = useState(
+    () => !isDefaultPageSize(pageSize),
   );
-  const [customPageSize, setCustomPageSize] = useState<string>(
-    String(pageSize),
-  );
+  const [customPageSize, setCustomPageSize] = useState(() => String(pageSize));
 
   const isCurrentPageSizeCustom = !isDefaultPageSize(pageSize);
   const showCustomInput = isCustomMode || isCurrentPageSizeCustom;
@@ -101,9 +101,8 @@ const DataTablePagination = <TData,>({
 
   const applyCustomPageSize = () => {
     const parsed = Number(customPageSize);
-    if (!Number.isInteger(parsed) || parsed <= 0) {
-      return;
-    }
+
+    if (!Number.isSafeInteger(parsed) || parsed <= 0) return;
 
     setIsCustomMode(!isDefaultPageSize(parsed));
 
@@ -123,9 +122,8 @@ const DataTablePagination = <TData,>({
     }
 
     const parsed = Number(value);
-    if (!Number.isInteger(parsed) || parsed <= 0) {
-      return;
-    }
+
+    if (!Number.isSafeInteger(parsed) || parsed <= 0) return;
 
     setIsCustomMode(false);
     setCustomPageSize(String(parsed));
@@ -139,9 +137,7 @@ const DataTablePagination = <TData,>({
   const jumpBackwardTarget = Math.max(1, currentPage - 5);
   const jumpForwardTarget = Math.min(computedTotalPages, currentPage + 5);
 
-  if (computedTotalPages <= 0) {
-    return null;
-  }
+  if (computedTotalPages <= 0) return null;
 
   return (
     <div className="flex flex-col gap-3 border-t px-4 py-3 md:flex-row md:items-center md:justify-between">
@@ -160,7 +156,7 @@ const DataTablePagination = <TData,>({
           if (item === "start-ellipsis") {
             return (
               <Button
-                key="start-ellipsis"
+                key={item}
                 variant="ghost"
                 size="sm"
                 className="min-w-9 px-2"
@@ -175,7 +171,7 @@ const DataTablePagination = <TData,>({
           if (item === "end-ellipsis") {
             return (
               <Button
-                key="end-ellipsis"
+                key={item}
                 variant="ghost"
                 size="sm"
                 className="min-w-9 px-2"
@@ -188,6 +184,7 @@ const DataTablePagination = <TData,>({
           }
 
           const isActive = item === currentPage;
+
           return (
             <Button
               key={item}
@@ -196,6 +193,7 @@ const DataTablePagination = <TData,>({
               className={cn("min-w-9", isActive && "pointer-events-none")}
               onClick={() => table.setPageIndex(item - 1)}
               disabled={isLoading}
+              aria-current={isActive ? "page" : undefined}
             >
               {item}
             </Button>
@@ -214,7 +212,11 @@ const DataTablePagination = <TData,>({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <Select value={pageSizeSelectValue} onValueChange={onPageSizeSelect}>
+        <Select
+          value={pageSizeSelectValue}
+          onValueChange={onPageSizeSelect}
+          disabled={isLoading}
+        >
           <SelectTrigger className="w-24" aria-label="Rows per page">
             <SelectValue placeholder="Limit" />
           </SelectTrigger>
@@ -225,9 +227,11 @@ const DataTablePagination = <TData,>({
                 {size}
               </SelectItem>
             ))}
+
             <SelectItem value="custom">Custom</SelectItem>
           </SelectContent>
         </Select>
+
         <span>rows</span>
 
         {showCustomInput && (
@@ -235,8 +239,10 @@ const DataTablePagination = <TData,>({
             <Input
               type="number"
               min={1}
+              step={1}
               className="h-9 w-24"
               value={customPageSize}
+              disabled={isLoading}
               onChange={(event) => setCustomPageSize(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -245,6 +251,7 @@ const DataTablePagination = <TData,>({
                 }
               }}
             />
+
             <Button
               size="sm"
               variant="outline"
