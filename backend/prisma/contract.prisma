@@ -29,7 +29,6 @@ model Submission {
   status      SubmissionStatus @default(PENDING)
   studentId   String
   student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  // review      Review[]
   review      Review?
 
   createdAt   DateTime         @default(now())
