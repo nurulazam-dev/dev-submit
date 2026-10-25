@@ -29,7 +29,8 @@ model Submission {
   status      SubmissionStatus @default(PENDING)
   studentId   String
   student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  review      Review[]
+  // review      Review[]
+  review      Review?
 
   createdAt   DateTime         @default(now())
 
@@ -45,9 +46,9 @@ model Submission {
 
 model Review {
   id           String       @id @default(uuid())
-  status       ReviewStatus @default(PENDING)
+  status       ReviewStatus @default(IN_PROGRESS)
   feedback     String
-  submissionId String
+  submissionId String       @unique
   submission   Submission   @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   reviewerId   String
   reviewer     User         @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
@@ -78,7 +79,6 @@ enum SubmissionStatus {
 }
 
 enum ReviewStatus {
-  PENDING
   IN_PROGRESS
   COMPLETED
 }

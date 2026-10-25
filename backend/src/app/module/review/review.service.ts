@@ -12,54 +12,44 @@ import {
   reviewSearchableFields,
   reviewSortableFields,
 } from "./review.constant";
-import { IReviewPayload, ReviewStatus } from "./review.interface";
+import { IReviewPayload, IReviewStatusUpdatePayload } from "./review.interface";
 
-const createReview = async (payload: IReviewPayload, studentId: string) => {
-  try {
-    return await db.transaction(async (tx) => {
-      const existingProject = await tx.orm.public.Review.first({
-        githubUrl: payload.githubUrl,
-      });
+const createReview = async (payload: IReviewPayload, reviewerId: string) => {
+  const reviewer = await db.orm.public.User.first({
+    id: reviewerId,
+  });
 
-      if (existingProject) {
-        throw new AppError(
-          status.CONFLICT,
-          "This project has already been submitted!",
-        );
-      }
-
-      const pendingSubmission = await tx.orm.public.Review.first({
-        studentId,
-        status: "PENDING",
-      });
-
-      if (pendingSubmission) {
-        throw new AppError(
-          status.CONFLICT,
-          "You already have a pending submission. Please wait until it is reviewed.",
-        );
-      }
-
-      return await tx.orm.public.Review.create({
-        feedback: payload.feedback,
-        status: "PENDING",
-      });
-    });
-  } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "sqlState" in error &&
-      error.sqlState === "23505"
-    ) {
-      throw new AppError(
-        status.CONFLICT,
-        "This project already exists or you already have a pending submission.",
-      );
-    }
-
-    throw error;
+  if (!reviewer) {
+    throw new AppError(status.NOT_FOUND, "Reviewer not found");
   }
+
+  const submission = await db.orm.public.Submission.first({
+    id: payload.submissionId,
+  });
+
+  if (!submission) {
+    throw new AppError(status.NOT_FOUND, "Submission not found");
+  }
+
+  const existingReview = await db.orm.public.Review.first({
+    submissionId: payload.submissionId,
+  });
+
+  if (existingReview) {
+    throw new AppError(
+      status.CONFLICT,
+      "Feedback has already been added for this submission",
+    );
+  }
+
+  const review = await db.orm.public.Review.create({
+    submissionId: payload.submissionId,
+    reviewerId,
+    feedback: payload.feedback,
+    status: payload.status,
+  });
+
+  return review;
 };
 
 const getAllReviews = async (query: IQueryParams) => {
@@ -87,7 +77,7 @@ const getAllReviews = async (query: IQueryParams) => {
   );
 };
 
-const getMyReviews = async (query: IQueryParams, studentId: string) => {
+const getMyReviews = async (query: IQueryParams, reviewerId: string) => {
   return (
     new QueryBuilder<IReviewPayload>(
       db.orm.public.Review as unknown as IQueryCollection,
@@ -101,7 +91,7 @@ const getMyReviews = async (query: IQueryParams, studentId: string) => {
     )
       .search()
       .where({
-        studentId,
+        reviewerId,
       })
       .filter()
       // .include({
@@ -127,17 +117,21 @@ const getReviewById = async (id: string) => {
   return result;
 };
 
-const adminUpdateReviewById = async (id: string, payload: IReviewPayload) => {
-  const data: Record<string, unknown> = {};
+const adminUpdateReviewById = async (
+  id: string,
+  payload: IReviewStatusUpdatePayload,
+) => {
+  const existingReview = await db.orm.public.Review.first({
+    id,
+  });
 
-  if (payload.status !== undefined)
-    data.status = payload.status as ReviewStatus;
-
-  const result = await db.orm.public.Review.where({ id }).update(data);
-
-  if (!result) {
+  if (!existingReview) {
     throw new AppError(status.NOT_FOUND, "Review not found!");
   }
+
+  const result = await db.orm.public.Review.where({ id }).update({
+    status: payload.status,
+  });
 
   return result;
 };

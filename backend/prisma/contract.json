@@ -25,10 +25,6 @@
             "codecId": "pg/text@1",
             "members": [
               {
-                "name": "PENDING",
-                "value": "PENDING"
-              },
-              {
                 "name": "IN_PROGRESS",
                 "value": "IN_PROGRESS"
               },
@@ -260,7 +256,8 @@
             },
             "relations": {
               "review": {
-                "cardinality": "1:N",
+                "cardinality": "1:1",
+                "nullable": true,
                 "on": {
                   "localFields": [
                     "id"
@@ -508,8 +505,8 @@
             "reviews": {
               "checks": [
                 {
-                  "expression": "\"status\" IN ('PENDING', 'IN_PROGRESS', 'COMPLETED')",
-                  "name": "reviews_status_check_c95d195d",
+                  "expression": "\"status\" IN ('IN_PROGRESS', 'COMPLETED')",
+                  "name": "reviews_status_check_d33d8563",
                   "prefix": "reviews_status_check"
                 }
               ],
@@ -543,7 +540,7 @@
                   "dataType": "pg/text",
                   "default": {
                     "kind": "literal",
-                    "value": "PENDING"
+                    "value": "IN_PROGRESS"
                   },
                   "nullable": false,
                   "valueSet": {
@@ -562,7 +559,9 @@
               "foreignKeys": [
                 {
                   "index": {
-                    "name": "reviews_submissionId_idx_89cd3f4e"
+                    "unique": [
+                      "submissionId"
+                    ]
                   },
                   "onDelete": "cascade",
                   "source": {
@@ -617,14 +616,6 @@
                   "name": "reviews_status_idx_e98638ab",
                   "prefix": "reviews_status_idx",
                   "unique": false
-                },
-                {
-                  "columns": [
-                    "submissionId"
-                  ],
-                  "name": "reviews_submissionId_idx_89cd3f4e",
-                  "prefix": "reviews_submissionId_idx",
-                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -632,7 +623,13 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "submissionId"
+                  ]
+                }
+              ]
             },
             "submissions": {
               "checks": [
@@ -903,7 +900,6 @@
             "ReviewStatus": {
               "kind": "valueSet",
               "values": [
-                "PENDING",
                 "IN_PROGRESS",
                 "COMPLETED"
               ]
@@ -936,7 +932,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b36fb4756a2ec0e8769d128d2bfefba215f5404c2cc3c9c3d001d7db5784896e"
+    "storageHash": "196b349b046e6c4db1758d9ba74989a2601223c25fc9f3446982cb4f093e112b"
   },
   "execution": {
     "executionHash": "75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25",

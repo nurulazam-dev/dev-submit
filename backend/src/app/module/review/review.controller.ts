@@ -34,11 +34,11 @@ const getAllReviews = catchAsync(async (req: Request, res: Response) => {
 
 const getMyReviews = catchAsync(async (req: Request, res: Response) => {
   const query = req.query;
-  const studentId = (req.user as any).userId;
+  const reviewerId = (req.user as any).userId;
 
   const result = await ReviewService.getMyReviews(
     query as IQueryParams,
-    studentId,
+    reviewerId,
   );
 
   sendResponse(res, {
@@ -74,7 +74,7 @@ const adminUpdateReviewById = catchAsync(
     sendResponse(res, {
       httpStatusCode: status.OK,
       success: true,
-      message: "Review updated successfully",
+      message: "Review status updated successfully",
       data: result,
     });
   },

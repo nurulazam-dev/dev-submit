@@ -2,6 +2,8 @@ import { Router } from "express";
 import { SubmissionController } from "./submission.controller";
 import { checkAuth } from "../../middleware/checkAuth";
 import { RateLimiter } from "@/app/middleware/rateLimiter";
+import { validateRequest } from "@/app/middleware/validateRequest.ts";
+import { SubmissionValidation } from "./submission.validation";
 
 const router = Router();
 
@@ -11,6 +13,7 @@ router.post(
   "/create",
   RateLimiter.submission,
   checkAuth("STUDENT"),
+  validateRequest(SubmissionValidation.createSubmissionZodSchema),
   SubmissionController.createSubmission,
 );
 

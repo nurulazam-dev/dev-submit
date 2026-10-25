@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'b36fb4756a2ec0e8769d128d2bfefba215f5404c2cc3c9c3d001d7db5784896e'>;
+  StorageHashBase<'196b349b046e6c4db1758d9ba74989a2601223c25fc9f3446982cb4f093e112b'>;
 export type ExecutionHash =
   ExecutionHashBase<'75cced5eb14ed299ef2e6447aa502ad22c11a38e3ba1a6bef6c93ac43d929e25'>;
 export type ProfileHash =
@@ -239,7 +239,7 @@ export type FieldOutputTypes = {
       readonly feedback: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly reviewerId: CodecTypes['pg/text@1']['output'];
-      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+      readonly status: 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['output'];
     };
     readonly Submission: {
@@ -275,7 +275,7 @@ export type FieldInputTypes = {
       readonly feedback: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly reviewerId: CodecTypes['pg/text@1']['input'];
-      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+      readonly status: 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['input'];
     };
     readonly Submission: {
@@ -311,7 +311,7 @@ export type StorageColumnTypes = {
       readonly feedback: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly reviewerId: CodecTypes['pg/text@1']['output'];
-      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+      readonly status: 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['output'];
     };
     readonly submissions: {
@@ -347,7 +347,7 @@ export type StorageColumnInputTypes = {
       readonly feedback: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly reviewerId: CodecTypes['pg/text@1']['input'];
-      readonly status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+      readonly status: 'IN_PROGRESS' | 'COMPLETED';
       readonly submissionId: CodecTypes['pg/text@1']['input'];
     };
     readonly submissions: {
@@ -383,7 +383,7 @@ export namespace Models {
     feedback: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/text@1']['output'];
     reviewerId: CodecTypes['pg/text@1']['output'];
-    status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+    status: 'IN_PROGRESS' | 'COMPLETED';
     submissionId: CodecTypes['pg/text@1']['output'];
     reviewer: public_User;
     submission: public_Submission;
@@ -398,7 +398,7 @@ export namespace Models {
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
     studentId: CodecTypes['pg/text@1']['output'];
     title: CodecTypes['pg/text@1']['output'];
-    review: public_Review[];
+    review: public_Review | null;
     student: public_User;
     readonly [RelationKeys]?: 'review' | 'student';
   };
@@ -480,7 +480,7 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly default: {
                     readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', 'PENDING'>;
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'IN_PROGRESS'>;
                   };
                   readonly many: false;
                 };
@@ -492,7 +492,7 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
+              uniques: readonly [{ readonly columns: readonly ['submissionId'] }];
               indexes: readonly [
                 {
                   readonly name: 'reviews_reviewerId_idx_25a27b4e';
@@ -504,12 +504,6 @@ type ContractBase = Omit<
                   readonly name: 'reviews_status_idx_e98638ab';
                   readonly prefix: 'reviews_status_idx';
                   readonly columns: readonly ['status'];
-                  readonly unique: false;
-                },
-                {
-                  readonly name: 'reviews_submissionId_idx_89cd3f4e';
-                  readonly prefix: 'reviews_submissionId_idx';
-                  readonly columns: readonly ['submissionId'];
                   readonly unique: false;
                 },
               ];
@@ -749,7 +743,7 @@ type ContractBase = Omit<
           readonly valueSet: {
             readonly ReviewStatus: {
               readonly kind: 'valueSet';
-              readonly values: readonly ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
+              readonly values: readonly ['IN_PROGRESS', 'COMPLETED'];
             };
             readonly SubmissionStatus: {
               readonly kind: 'valueSet';
@@ -895,7 +889,8 @@ type ContractBase = Omit<
                   readonly namespace: 'public' & NamespaceId;
                   readonly model: 'Review';
                 };
-                readonly cardinality: '1:N';
+                readonly cardinality: '1:1';
+                readonly nullable: true;
                 readonly on: {
                   readonly localFields: readonly ['id'];
                   readonly targetFields: readonly ['submissionId'];
@@ -1034,7 +1029,6 @@ type ContractBase = Omit<
           readonly ReviewStatus: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
-              { readonly name: 'PENDING'; readonly value: 'PENDING' },
               { readonly name: 'IN_PROGRESS'; readonly value: 'IN_PROGRESS' },
               { readonly name: 'COMPLETED'; readonly value: 'COMPLETED' },
             ];
@@ -1064,7 +1058,6 @@ type ContractBase = Omit<
         };
         readonly enumMemberTypes?: {
           readonly ReviewStatus: readonly [
-            { readonly name: 'PENDING'; readonly value: 'PENDING' },
             { readonly name: 'IN_PROGRESS'; readonly value: 'IN_PROGRESS' },
             { readonly name: 'COMPLETED'; readonly value: 'COMPLETED' },
           ];

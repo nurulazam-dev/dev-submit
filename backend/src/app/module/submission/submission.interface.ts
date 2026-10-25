@@ -1,3 +1,5 @@
+import { IReviewPayload } from "../review/review.interface";
+
 export type SubmissionStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface ISubmissionPayload {
@@ -6,7 +8,7 @@ export interface ISubmissionPayload {
   githubUrl: string;
   liveUrl: string;
   status: SubmissionStatus;
-  reviews?: any[];
+  review?: IReviewPayload;
   createdAt: Date | string;
 }
 
