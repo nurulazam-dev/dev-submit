@@ -9,7 +9,6 @@ export default defineConfig({
   bundle: true,
   splitting: false,
   sourcemap: true,
-  // Add this banner to shim require() for CJS dependencies when building ESM
   banner: ({ format }) => {
     if (format === "esm") {
       return {

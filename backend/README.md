@@ -36,3 +36,16 @@ npx prisma db init             # Create tables in the database
 npx prisma db update             # update the database
 npx prisma migration status    # Show migration status
 ```
+
+```
+/* {
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ]
+}
+ */
+```
