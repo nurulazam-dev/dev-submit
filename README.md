@@ -20,8 +20,6 @@ Dev Submit is a full-stack submission-management platform for students to submit
 - [Development Commands](#development-commands)
 - [Security Considerations](#security-considerations)
 - [Development Guidelines](#development-guidelines)
-- [Potential Improvements](#potential-improvements)
-- [License](#license)
 
 ## Overview
 
@@ -415,7 +413,10 @@ Run this in each project directory if pnpm is the package manager
 specified by the lockfile:
 
 ```bash
+#  frontend
 pnpm install
+#  backend
+npm install
 ```
 
 Avoid mixing npm, Yarn, and pnpm in the same package directory.
@@ -439,7 +440,7 @@ Use the scripts declared in the backend `package.json`. A typical
 development script may be:
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ### 6. Start the frontend
@@ -497,19 +498,6 @@ Command Purpose
 - Add tests for authentication, validation, submission ownership, and
   status transitions.
 
-## Potential Improvements
-
-Depending on the final requirements, consider:
-
-- Automated tests for authentication and submission workflows.
-- A dedicated reviewer dashboard.
-- Submission detail pages and review history.
-- Clear resubmission rules for rejected submissions.
-- Notifications when submission status changes.
-- API documentation with OpenAPI/Swagger.
-- CI checks for linting, type checking, and tests.
-- Deployment documentation for the frontend, API, and PostgreSQL.
-
 ## Contributing
 
 1.  Create a feature branch.
@@ -517,7 +505,3 @@ Depending on the final requirements, consider:
 3.  Run available lint, type-check, and test commands.
 4.  Document new environment variables and API routes.
 5.  Open a pull request with a concise summary of the change.
-
-## License
-
-Add the project's chosen license before publishing the repository.
